@@ -1,0 +1,165 @@
+/* miniprogram/pages/concerts/concerts.wxss */
+.container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  background-color: #fff;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.filter-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 20rpx;
+  border-right: 1rpx solid #eee;
+}
+
+.filter-item:last-child {
+  border-right: none;
+}
+
+.filter-item text {
+  font-size: 28rpx;
+  color: #333;
+  margin-right: 10rpx;
+}
+
+.arrow-icon {
+  width: 16rpx;
+  height: 16rpx;
+  transform: rotate(90deg);
+}
+
+/* 演出列表 */
+.concerts-list {
+  padding: 20rpx;
+}
+
+.concert-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.concert-poster {
+  width: 100%;
+  height: 320rpx;
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.concert-info {
+  padding: 24rpx;
+}
+
+.concert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.concert-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  margin-right: 16rpx;
+  line-height: 1.4;
+}
+
+.arrow-right {
+  width: 24rpx;
+  height: 24rpx;
+  opacity: 0.6;
+  transform: rotate(-90deg);
+}
+
+.concert-details {
+  margin-bottom: 20rpx;
+}
+
+.concert-date {
+  display: block;
+  font-size: 28rpx;
+  color: #FF6B35;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+}
+
+.concert-venue {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 4rpx;
+}
+
+.concert-city {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.concert-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.concert-bands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.band-tag {
+  background-color: #f0f0f0;
+  color: #666;
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+.concert-price {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.price {
+  font-size: 32rpx;
+  color: #FF6B35;
+  font-weight: 600;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  padding: 8rpx;
+  margin: 0;
+  line-height: 1;
+}
+
+.favorite-icon {
+  font-size: 36rpx;
+  color: #ccc;
+}
+
+/* 加载状态 */
+.loading, .no-more, .empty {
+  text-align: center;
+  padding: 40rpx;
+  color: #999;
+  font-size: 28rpx;
+}

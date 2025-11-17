@@ -1,0 +1,129 @@
+<!--miniprogram/pages/concert-detail/concert-detail.wxml-->
+<view class="container" wx:if="{{!loading}}">
+  <!-- 演出海报 -->
+  <view class="poster-section">
+    <image src="{{concert.poster}}" class="concert-poster" mode="aspectFill"></image>
+    <view class="poster-overlay">
+      <view class="concert-status" wx:if="{{concert.status === 'upcoming'}}">
+        <text>即将开始</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 演出信息 -->
+  <view class="info-section">
+    <view class="section-header">
+      <text class="concert-title">{{concert.title}}</text>
+      <view class="action-buttons">
+        <button class="action-btn" bindtap="onFavoriteTap">
+          <text class="btn-icon">{{isFavorited ? '★' : '☆'}}</text>
+        </button>
+        <button class="action-btn" bindtap="onShareTap">
+          <text class="btn-icon">⤴</text>
+        </button>
+      </view>
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">演出时间</text>
+      <text class="info-value">{{concert.date}} {{concert.city}}</text>
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">演出场地</text>
+      <text class="info-value">{{concert.venue}}</text>
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">演出阵容</text>
+      <view class="bands-container">
+        <text wx:for="{{concert.bands}}" wx:key="*this" class="band-tag">{{item}}</text>
+      </view>
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">音乐风格</text>
+      <view class="genres-container">
+        <text wx:for="{{concert.genres}}" wx:key="*this" class="genre-tag">{{item}}</text>
+      </view>
+    </view>
+
+    <view class="info-item">
+      <text class="info-label">票价</text>
+      <text class="price-value">¥{{concert.price}}</text>
+    </view>
+  </view>
+
+  <!-- 演出介绍 -->
+  <view class="description-section">
+    <view class="section-title">
+      <text>演出介绍</text>
+    </view>
+    <text class="description-text">{{concert.description}}</text>
+  </view>
+
+  <!-- 评论区 -->
+  <view class="comments-section">
+    <view class="section-title">
+      <text>演出讨论 ({{comments.length}})</text>
+    </view>
+    
+    <!-- 评论输入 -->
+    <view class="comment-input-section" wx:if="{{hasUserInfo}}">
+      <view class="comment-input-container">
+        <input 
+          class="comment-input" 
+          placeholder="说说你对这场演出的看法..."
+          value="{{commentInput}}"
+          bindinput="onCommentInput"
+          maxlength="200"
+        />
+        <button class="submit-btn" bindtap="onSubmitComment">发布</button>
+      </view>
+    </view>
+    
+    <view class="login-prompt" wx:else>
+      <text>登录后可以参与讨论</text>
+      <button class="login-btn-small" bindtap="goToProfile">立即登录</button>
+    </view>
+
+    <!-- 评论列表 -->
+    <view class="comments-list">
+      <view wx:for="{{comments}}" wx:key="_id" class="comment-item">
+        <image src="{{item.userAvatar}}" class="comment-avatar"></image>
+        <view class="comment-content">
+          <view class="comment-header">
+            <text class="comment-user">{{item.userName}}</text>
+            <text class="comment-time">{{item.timeFormatted}}</text>
+          </view>
+          <text class="comment-text">{{item.content}}</text>
+          <view class="comment-actions">
+            <view class="like-btn" bindtap="onLikeComment" data-id="{{item._id}}">
+              <text class="like-icon">{{item.isLiked ? '♥' : '♡'}}</text>
+              <text class="like-count">{{item.likes}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view wx:if="{{comments.length === 0}}" class="no-comments">
+        <text>暂无评论，快来发表你的看法吧！</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section">
+    <button class="primary-btn" bindtap="onBuyTicketTap">
+      <text>立即购票</text>
+    </button>
+    <button class="secondary-btn" bindtap="onNavigateTap">
+      <text>场地导航</text>
+    </button>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view wx:if="{{loading}}" class="loading-container">
+  <text>加载中...</text>
+</view>

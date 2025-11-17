@@ -1,0 +1,71 @@
+<!--miniprogram/pages/concerts/concerts.wxml-->
+<view class="container">
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <picker bindchange="onCityChange" value="{{cities.indexOf(city)}}" range="{{cities}}">
+      <view class="filter-item">
+        <text>{{city}}</text>
+        <image src="/miniprogram/icons/s-arrow-g.svg" class="arrow-icon"></image>
+      </view>
+    </picker>
+    
+    <picker bindchange="onGenreChange" value="{{genres.indexOf(genre)}}" range="{{genres}}">
+      <view class="filter-item">
+        <text>{{genre}}</text>
+        <image src="/miniprogram/icons/s-arrow-g.svg" class="arrow-icon"></image>
+      </view>
+    </picker>
+    
+    <picker bindchange="onPriceRangeChange" value="{{priceRanges.indexOf(priceRange)}}" range="{{priceRanges}}">
+      <view class="filter-item">
+        <text>{{priceRange}}</text>
+        <image src="/miniprogram/icons/s-arrow-g.svg" class="arrow-icon"></image>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 演出列表 -->
+  <scroll-view scroll-y class="concerts-list" bindscrolltolower="onReachBottom" refresher-enabled refresher-triggered="{{false}}" bindrefresherrefresh="onPullDownRefresh">
+    <view wx:for="{{concerts}}" wx:key="_id" class="concert-card" bindtap="onConcertTap" data-id="{{item._id}}">
+      <image src="{{item.poster}}" class="concert-poster" mode="aspectFill"></image>
+      
+      <view class="concert-info">
+        <view class="concert-header">
+          <text class="concert-title">{{item.title}}</text>
+          <image src="/miniprogram/icons/s-arrow-g.svg" class="arrow-right"></image>
+        </view>
+        
+        <view class="concert-details">
+          <text class="concert-date">{{item.dateFormatted}}</text>
+          <text class="concert-venue">{{item.venue}}</text>
+          <text class="concert-city">{{item.city}}</text>
+        </view>
+        
+        <view class="concert-footer">
+          <view class="concert-bands">
+            <text wx:for="{{item.bands}}" wx:key="*this" class="band-tag">{{item}}</text>
+          </view>
+          <view class="concert-price">
+            <text class="price">{{item.priceFormatted}}</text>
+            <button class="favorite-btn" catchtap="onFavoriteTap" data-id="{{item._id}}">
+              <text class="favorite-icon">♡</text>
+            </button>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 加载更多 -->
+    <view wx:if="{{loading}}" class="loading">
+      <text>加载中...</text>
+    </view>
+    
+    <view wx:if="{{!hasMore && concerts.length > 0}}" class="no-more">
+      <text>没有更多演出了</text>
+    </view>
+    
+    <view wx:if="{{concerts.length === 0 && !loading}}" class="empty">
+      <text>暂无演出信息</text>
+    </view>
+  </scroll-view>
+</view>

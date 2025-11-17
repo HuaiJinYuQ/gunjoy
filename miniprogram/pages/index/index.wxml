@@ -1,0 +1,60 @@
+<!--index.wxml-->
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="container">
+    <!-- 头部横幅 -->
+    <view class="header-banner">
+      <view class="banner-content">
+        <text class="banner-title">滚聚 GunJoy</text>
+        <text class="banner-subtitle">摇滚乐迷的专属社区</text>
+      </view>
+    </view>
+
+    <!-- 快捷入口 -->
+    <view class="quick-access">
+      <view class="access-item" bindtap="goToConcerts">
+        <image src="/miniprogram/images/Icon1.png" class="access-icon"></image>
+        <text class="access-text">演出信息</text>
+      </view>
+      <view class="access-item" bindtap="goToProfile">
+        <image src="/miniprogram/images/head.png" class="access-icon"></image>
+        <text class="access-text">个人中心</text>
+      </view>
+      <view class="access-item" bindtap="showFeature">
+        <image src="/miniprogram/images/Icon3.png" class="access-icon"></image>
+        <text class="access-text">现场笔记</text>
+      </view>
+      <view class="access-item" bindtap="showFeature">
+        <image src="/miniprogram/images/Icon4.png" class="access-icon"></image>
+        <text class="access-text">摇滚社群</text>
+      </view>
+    </view>
+
+    <!-- 推荐演出 -->
+    <view class="recommended-section">
+      <view class="section-header">
+        <text class="section-title">热门演出</text>
+        <text class="section-more" bindtap="goToConcerts">查看更多</text>
+      </view>
+      
+      <view class="concert-list">
+        <view wx:for="{{recommendedConcerts}}" wx:key="_id" class="concert-item" bindtap="goToConcertDetail" data-id="{{item._id}}">
+          <image src="{{item.poster}}" class="concert-poster" mode="aspectFill"></image>
+          <view class="concert-info">
+            <text class="concert-title">{{item.title}}</text>
+            <text class="concert-date">{{item.dateFormatted}}</text>
+            <text class="concert-venue">{{item.venue}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 用户引导 -->
+    <view class="guide-section" wx:if="{{!hasUserInfo}}">
+      <view class="guide-content">
+        <text class="guide-title">开始你的摇滚之旅</text>
+        <text class="guide-desc">登录后可以发现更多精彩的摇滚演出</text>
+        <button class="guide-btn" bindtap="goToProfile">立即登录</button>
+      </view>
+    </view>
+  </view>
+</scroll-view>

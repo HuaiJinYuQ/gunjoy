@@ -1,0 +1,84 @@
+{
+  "description": "云开发环境配置",
+  "env": "gunjoy-env-1g2h3j4k5l6m7n8o9p0q",
+  "functions": {
+    "getConcerts": {
+      "name": "getConcerts",
+      "config": {
+        "timeout": 5,
+        "memorySize": 128
+      }
+    },
+    "getConcertDetail": {
+      "name": "getConcertDetail",
+      "config": {
+        "timeout": 5,
+        "memorySize": 128
+      }
+    },
+    "userLogin": {
+      "name": "userLogin",
+      "config": {
+        "timeout": 5,
+        "memorySize": 128
+      }
+    },
+    "publishComment": {
+      "name": "publishComment",
+      "config": {
+        "timeout": 5,
+        "memorySize": 128
+      }
+    },
+    "favoriteConcert": {
+      "name": "favoriteConcert",
+      "config": {
+        "timeout": 5,
+        "memorySize": 128
+      }
+    },
+    "getUserFavorites": {
+      "name": "getUserFavorites",
+      "config": {
+        "timeout": 5,
+        "memorySize": 128
+      }
+    }
+  },
+  "database": {
+    "collections": [
+      {
+        "name": "concerts",
+        "description": "演出信息集合",
+        "permissions": {
+          "read": true,
+          "write": false
+        }
+      },
+      {
+        "name": "users",
+        "description": "用户信息集合",
+        "permissions": {
+          "read": true,
+          "write": true
+        }
+      },
+      {
+        "name": "comments",
+        "description": "评论集合",
+        "permissions": {
+          "read": true,
+          "write": true
+        }
+      },
+      {
+        "name": "favorites",
+        "description": "用户收藏集合",
+        "permissions": {
+          "read": true,
+          "write": true
+        }
+      }
+    ]
+  }
+}
