@@ -97,6 +97,28 @@
   padding: 32rpx;
 }
 
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #333;
+}
+
 .section-title {
   font-size: 32rpx;
   font-weight: 600;
@@ -175,3 +197,22 @@
   opacity: 0.4;
   transform: rotate(-90deg);
 }
+.top-section { padding: 20rpx; }
+.login-tip { background-color: #fff; border-radius: 16rpx; padding: 24rpx; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.profile-card { background-color: #fff; border-radius: 16rpx; padding: 24rpx; display: flex; align-items: center; }
+.profile-card .avatar { border: none; margin-bottom: 0; margin-right: 20rpx; }
+.profile-card .nickname { font-weight: 600; margin-bottom: 0; }
+.profile-meta { flex: 1; }
+.meta-row { display: flex; align-items: center; gap: 12rpx; color: #666; margin-top: 8rpx; }
+.meta-item { font-size: 26rpx; }
+.meta-sep { color: #ccc; }
+.edit-arrow { font-size: 40rpx; color: #ccc; }
+
+.grid-section { margin: 20rpx; background-color: #fff; border-radius: 16rpx; padding: 16rpx; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16rpx; }
+.grid-item { background-color: #fafafa; border-radius: 12rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32rpx 0; }
+.grid-icon { font-size: 36rpx; color: #FF6B35; margin-bottom: 12rpx; }
+.grid-text { font-size: 28rpx; color: #333; }
+
+.about-section { margin: 20rpx; background-color: #fff; border-radius: 16rpx; padding: 24rpx; text-align: center; color: #666; }
+.about-title { font-size: 28rpx; color: #333; display: block; margin-bottom: 8rpx; }
+.about-desc { font-size: 24rpx; }

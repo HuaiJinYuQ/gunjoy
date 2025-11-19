@@ -1,33 +1,9 @@
 <!--index.wxml-->
-<scroll-view class="scrollarea" scroll-y type="list">
+<scroll-view class="scrollarea" scroll-y type="list" bindscrolltolower="onReachBottom">
   <view class="container">
-    <!-- 头部横幅 -->
-    <view class="header-banner">
-      <view class="banner-content">
-        <text class="banner-title">滚聚 GunJoy</text>
-        <text class="banner-subtitle">摇滚乐迷的专属社区</text>
-      </view>
-    </view>
+    
 
-    <!-- 快捷入口 -->
-    <view class="quick-access">
-      <view class="access-item" bindtap="goToConcerts">
-        <image src="/miniprogram/images/Icon1.png" class="access-icon"></image>
-        <text class="access-text">演出信息</text>
-      </view>
-      <view class="access-item" bindtap="goToProfile">
-        <image src="/miniprogram/images/head.png" class="access-icon"></image>
-        <text class="access-text">个人中心</text>
-      </view>
-      <view class="access-item" bindtap="showFeature">
-        <image src="/miniprogram/images/Icon3.png" class="access-icon"></image>
-        <text class="access-text">现场笔记</text>
-      </view>
-      <view class="access-item" bindtap="showFeature">
-        <image src="/miniprogram/images/Icon4.png" class="access-icon"></image>
-        <text class="access-text">摇滚社群</text>
-      </view>
-    </view>
+    
 
     <!-- 推荐演出 -->
     <view class="recommended-section">
@@ -43,6 +19,40 @@
             <text class="concert-title">{{item.title}}</text>
             <text class="concert-date">{{item.dateFormatted}}</text>
             <text class="concert-venue">{{item.venue}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 社区热帖 -->
+    <view class="feed-section">
+      <view class="section-header">
+        <text class="section-title">社区热帖</text>
+      </view>
+      <view class="feed-list">
+        <view wx:for="{{posts}}" wx:key="_id" class="post-card" bindtap="onPostTap" data-id="{{item._id}}">
+          <view class="post-header">
+            <image class="avatar" src="{{item.userAvatar}}"></image>
+            <view class="meta">
+              <text class="name">{{item.userName}}</text>
+              <text class="time">{{item.timeFormatted}}</text>
+            </view>
+          </view>
+          <view class="post-content">
+            <text class="content">{{item.content}}</text>
+          </view>
+          <view class="post-images" wx:if="{{item.images && item.images.length > 0}}">
+            <image wx:for="{{item.images}}" wx:key="*this" src="{{item}}" class="post-image" mode="aspectFill"></image>
+          </view>
+          <view class="post-actions">
+            <view class="action" bindtap="onLikePost" data-id="{{item._id}}">
+              <text class="icon">{{item.isLiked ? '♥' : '♡'}}</text>
+              <text class="count">{{item.likes}}</text>
+            </view>
+            <view class="action">
+              <text class="icon">💬</text>
+              <text class="count">{{item.comments}}</text>
+            </view>
           </view>
         </view>
       </view>

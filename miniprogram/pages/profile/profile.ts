@@ -8,6 +8,22 @@ interface UserInfo {
   country: string;
 }
 
+interface DBUser {
+  _id: string;
+  openid: string;
+  unionid?: string;
+  nickname?: string;
+  avatarUrl?: string;
+  gender?: number;
+  birthday?: string;
+  city?: string;
+  province?: string;
+  age?: number | null;
+  zodiac?: string | null;
+  signature?: string;
+  tags?: string[];
+}
+
 interface UserPreferences {
   genres: string[];
   cities: string[];
@@ -17,6 +33,7 @@ interface UserPreferences {
 Page({
   data: {
     userInfo: null as UserInfo | null,
+    dbUser: null as DBUser | null,
     hasUserInfo: false,
     canIUseGetUserProfile: false,
     isLoggedIn: false,
@@ -27,6 +44,7 @@ Page({
     } as UserPreferences,
     favoriteCount: 0,
     noteCount: 0,
+    zodiac: '',
     genres: ['摇滚', '朋克', '金属', '独立', '民谣摇滚', '电子摇滚'],
     cities: ['北京', '上海', '广州', '深圳', '成都', '西安', '武汉', '杭州'],
     priceRanges: [
@@ -45,17 +63,7 @@ Page({
       });
     }
     
-    // 检查本地存储的用户信息
-    const userInfo = wx.getStorageSync('userInfo');
-    if (userInfo) {
-      this.setData({
-        userInfo: userInfo,
-        hasUserInfo: true,
-        isLoggedIn: true
-      });
-    }
-    
-    // 加载用户偏好设置
+    this.tryLoadProfileFromCloud();
     this.loadUserPreferences();
   },
 
@@ -64,15 +72,25 @@ Page({
     wx.getUserProfile({
       desc: '用于完善用户资料',
       success: (res) => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true,
-          isLoggedIn: true
-        });
-        wx.setStorageSync('userInfo', res.userInfo);
-        
-        // 初始化用户偏好
-        this.initializeUserPreferences(res.userInfo);
+        const profile = res.userInfo as UserInfo
+        this.setData({ userInfo: profile })
+        wx.cloud.callFunction({
+          name: 'gunjoy',
+          data: { type: 'userLogin', userInfo: profile }
+        }).then((r: any) => {
+          if (r.result && r.result.code === 0) {
+            const dbUser = r.result.data as DBUser
+            this.setData({
+              dbUser,
+              hasUserInfo: true,
+              isLoggedIn: true
+            })
+            wx.setStorageSync('userInfo', profile)
+            this.initializeUserPreferences(profile)
+          } else {
+            wx.showToast({ title: '登录失败', icon: 'none' })
+          }
+        }).catch(() => wx.showToast({ title: '登录失败', icon: 'none' }))
       },
       fail: () => {
         wx.showToast({
@@ -86,13 +104,25 @@ Page({
   getUserInfo(e: any) {
     // 兼容旧版本
     if (e.detail.userInfo) {
-      this.setData({
-        userInfo: e.detail.userInfo,
-        hasUserInfo: true,
-        isLoggedIn: true
-      });
-      wx.setStorageSync('userInfo', e.detail.userInfo);
-      this.initializeUserPreferences(e.detail.userInfo);
+      const profile = e.detail.userInfo as UserInfo
+      this.setData({ userInfo: profile })
+      wx.cloud.callFunction({
+        name: 'gunjoy',
+        data: { type: 'userLogin', userInfo: profile }
+      }).then((r: any) => {
+        if (r.result && r.result.code === 0) {
+          const dbUser = r.result.data as DBUser
+          this.setData({
+            dbUser,
+            hasUserInfo: true,
+            isLoggedIn: true
+          })
+          wx.setStorageSync('userInfo', profile)
+          this.initializeUserPreferences(profile)
+        } else {
+          wx.showToast({ title: '登录失败', icon: 'none' })
+        }
+      }).catch(() => wx.showToast({ title: '登录失败', icon: 'none' }))
     }
   },
 
@@ -184,6 +214,7 @@ Page({
           
           this.setData({
             userInfo: null,
+            dbUser: null,
             hasUserInfo: false,
             isLoggedIn: false,
             preferences: {
@@ -200,6 +231,38 @@ Page({
         }
       }
     });
+  },
+
+  tryLoadProfileFromCloud() {
+    wx.cloud.callFunction({ name: 'gunjoy', data: { type: 'userGetProfile' } })
+      .then((r: any) => {
+        if (r.result && r.result.code === 0) {
+          const user = r.result.data as DBUser
+          this.setData({
+            dbUser: user,
+            isLoggedIn: true,
+            hasUserInfo: true,
+            zodiac: (user as any).zodiac || ''
+          })
+        }
+      })
+      .catch(() => {})
+  },
+
+  goToProfileEdit() {
+    wx.navigateTo({ url: '/pages/profile-edit/profile-edit' })
+  },
+
+  onMyPosts() {
+    wx.showToast({ title: '开发中', icon: 'none' })
+  },
+
+  onFeedback() {
+    wx.showToast({ title: '反馈入口开发中', icon: 'none' })
+  },
+
+  onSettings() {
+    wx.showToast({ title: '设置开发中', icon: 'none' })
   },
 
   onMyFavorites() {
@@ -219,7 +282,7 @@ Page({
   onAbout() {
     wx.showModal({
       title: '关于滚聚',
-      content: '滚聚 - 摇滚乐迷的专属社区\n版本：v1.0.0\n\n让每一次摇滚现场都充满回忆',
+      content: '滚聚 - 摇滚乐迷的专属社区\n让每一次摇滚现场都充满回忆\n版本：v1.0.0',
       showCancel: false
     });
   }

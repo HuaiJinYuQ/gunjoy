@@ -1,0 +1,58 @@
+<view class="container">
+  <view class="form-section">
+    <view class="form-item avatar-item">
+      <text class="label">头像</text>
+      <view class="avatar-row">
+        <image class="avatar" src="{{form.avatarUrl || '/miniprogram/images/head.png'}}"></image>
+        <button class="btn" bindtap="onChangeAvatar">更换</button>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="label">昵称</text>
+      <input class="input" value="{{form.nickname}}" bindinput="onInput" data-key="nickname" placeholder="请输入昵称" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">性别</text>
+      <view class="radio-row">
+        <label class="radio" bindtap="onGenderSelect" data-value="1">
+          <view class="radio-dot {{form.gender === 1 ? 'active' : ''}}"></view>
+          <text>男</text>
+        </label>
+        <label class="radio" bindtap="onGenderSelect" data-value="2">
+          <view class="radio-dot {{form.gender === 2 ? 'active' : ''}}"></view>
+          <text>女</text>
+        </label>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="label">生日</text>
+      <picker mode="date" value="{{form.birthday || '1998-01-01'}}" bindchange="onBirthdayChange">
+        <view class="picker-value">{{form.birthday || '请选择生日'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">城市</text>
+      <input class="input" value="{{form.city}}" bindinput="onInput" data-key="city" placeholder="请输入城市" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">个性签名</text>
+      <textarea class="textarea" value="{{form.signature}}" bindinput="onInput" data-key="signature" placeholder="说点什么..." />
+    </view>
+
+    <view class="form-item">
+      <text class="label">音乐标签</text>
+      <view class="tags-row">
+        <view wx:for="{{allTags}}" wx:key="*this" class="tag {{form.tags.indexOf(item) > -1 ? 'active' : ''}}" data-index="{{index}}" bindtap="onTagToggle">{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="actions">
+    <button class="save-btn" bindtap="onSave">保存</button>
+  </view>
+</view>

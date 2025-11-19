@@ -1,115 +1,70 @@
 <!--miniprogram/pages/profile/profile.wxml-->
 <view class="container">
-  <!-- 用户信息区域 -->
-  <view class="user-section">
-    <view class="user-info" wx:if="{{isLoggedIn}}">
-      <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
-      <text class="nickname">{{userInfo.nickName}}</text>
-      <view class="user-stats">
-        <view class="stat-item">
-          <text class="stat-number">{{favoriteCount}}</text>
-          <text class="stat-label">收藏</text>
-        </view>
-        <view class="stat-item">
-          <text class="stat-number">{{noteCount}}</text>
-          <text class="stat-label">笔记</text>
-        </view>
-      </view>
+  <!-- 顶部信息与登录引导 -->
+  <view class="top-section">
+    <view class="login-tip" wx:if="{{!isLoggedIn}}">
+      <text>登录后可同步你的收藏与发帖</text>
+      <button class="login-btn" bindtap="getUserProfile" wx:if="{{canIUseGetUserProfile}}">微信授权登录</button>
+      <button class="login-btn" open-type="getUserInfo" bindgetuserinfo="getUserInfo" wx:else>微信授权登录</button>
     </view>
-    
-    <view class="login-section" wx:else>
-      <view class="login-prompt">
-        <text class="login-title">登录滚聚</text>
-        <text class="login-desc">发现更多摇滚现场</text>
+
+    <view class="profile-card" wx:if="{{isLoggedIn}}" bindtap="goToProfileEdit">
+      <image class="avatar" src="{{(dbUser && (dbUser.avatarUrl || dbUser.avatar)) || (userInfo && userInfo.avatarUrl) || '../../images/head.png'}}"></image>
+      <view class="profile-meta">
+        <text class="nickname">{{(dbUser && dbUser.nickname) || (userInfo && userInfo.nickName) || '未命名用户'}}</text>
+        <view class="meta-row">
+          <text class="meta-item">{{dbUser && dbUser.age ? dbUser.age + '岁' : '年龄未设置'}}</text>
+          <text class="meta-sep">·</text>
+          <text class="meta-item">{{zodiac || '星座未设置'}}</text>
+          <text class="meta-sep">·</text>
+          <text class="meta-item">{{(dbUser && dbUser.province) || ''}} {{(dbUser && dbUser.city) || ''}}</text>
+        </view>
       </view>
-      <button class="login-btn" bindtap="getUserProfile" wx:if="{{canIUseGetUserProfile}}">
-        <text>微信授权登录</text>
-      </button>
-      <button class="login-btn" open-type="getUserInfo" bindgetuserinfo="getUserInfo" wx:else>
-        <text>微信授权登录</text>
-      </button>
+      <text class="edit-arrow">›</text>
     </view>
   </view>
 
-  <!-- 音乐偏好设置 -->
-  <view class="preferences-section" wx:if="{{isLoggedIn}}">
-    <view class="section-title">
-      <text>音乐偏好</text>
+  <!-- 中部网格功能 -->
+  <view class="grid-section" wx:if="{{isLoggedIn}}">
+    <view class="grid-item" bindtap="onMyPosts">
+      <text class="grid-icon">📝</text>
+      <text class="grid-text">我的发帖</text>
     </view>
-    
-    <view class="preference-group">
-      <view class="preference-label">
-        <text>喜欢的风格</text>
-      </view>
-      <view class="tag-container">
-        <view 
-          wx:for="{{genres}}" 
-          wx:key="*this" 
-          class="tag {{preferences.genres.indexOf(item) > -1 ? 'active' : ''}}"
-          bindtap="onGenreChange"
-          data-index="{{index}}"
-        >
-          <text>{{item}}</text>
-        </view>
-      </view>
+    <view class="grid-item" bindtap="onMyFavorites">
+      <text class="grid-icon">★</text>
+      <text class="grid-text">我的收藏</text>
     </view>
-
-    <view class="preference-group">
-      <view class="preference-label">
-        <text>关注城市</text>
-      </view>
-      <view class="tag-container">
-        <view 
-          wx:for="{{cities}}" 
-          wx:key="*this" 
-          class="tag {{preferences.cities.indexOf(item) > -1 ? 'active' : ''}}"
-          bindtap="onCityChange"
-          data-index="{{index}}"
-        >
-          <text>{{item}}</text>
-        </view>
-      </view>
+    <view class="grid-item" bindtap="onFeedback">
+      <text class="grid-icon">💬</text>
+      <text class="grid-text">意见反馈</text>
     </view>
-
-    <view class="preference-group">
-      <view class="preference-label">
-        <text>价格区间</text>
-      </view>
-      <view class="tag-container">
-        <view 
-          wx:for="{{priceRanges}}" 
-          wx:for-item="range" 
-          wx:key="index" 
-          class="tag {{preferences.priceRange[0] === range.value[0] && preferences.priceRange[1] === range.value[1] ? 'active' : ''}}"
-          bindtap="onPriceRangeChange"
-          data-index="{{index}}"
-        >
-          <text>{{range.label}}</text>
-        </view>
-      </view>
+    <view class="grid-item" bindtap="onSettings">
+      <text class="grid-icon">⚙️</text>
+      <text class="grid-text">设置</text>
     </view>
   </view>
 
+ 
   <!-- 功能菜单 -->
   <view class="menu-section">
     <view class="menu-item" bindtap="onMyFavorites" wx:if="{{isLoggedIn}}">
       <text class="menu-text">我的收藏</text>
-      <image src="/miniprogram/icons/s-arrow-g.svg" class="arrow-icon"></image>
+      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
     </view>
     
     <view class="menu-item" bindtap="onMyNotes" wx:if="{{isLoggedIn}}">
       <text class="menu-text">我的笔记</text>
-      <image src="/miniprogram/icons/s-arrow-g.svg" class="arrow-icon"></image>
+      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
     </view>
     
-    <view class="menu-item" bindtap="onAbout">
-      <text class="menu-text">关于滚聚</text>
-      <image src="/miniprogram/icons/s-arrow-g.svg" class="arrow-icon"></image>
+    <view  class="about-section"  bindtap="onAbout">
+      <text class="about-title">关于滚聚 GunJoy</text>
+      <text class="about-desc">摇滚乐迷的专属社区 · 版本 v1.0.0</text>
     </view>
     
     <view class="menu-item" bindtap="onLogout" wx:if="{{isLoggedIn}}">
       <text class="menu-text logout-text">退出登录</text>
-      <image src="/miniprogram/icons/s-arrow-g.svg" class="arrow-icon"></image>
+      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
     </view>
   </view>
 </view>

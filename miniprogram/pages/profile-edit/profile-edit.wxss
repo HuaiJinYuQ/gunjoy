@@ -1,0 +1,20 @@
+/* 编辑个人信息 */
+.container { background-color: #f5f5f5; min-height: 100vh; }
+.form-section { background-color: #fff; margin: 20rpx; border-radius: 16rpx; padding: 24rpx; }
+.form-item { margin-bottom: 24rpx; }
+.label { display: block; font-size: 28rpx; color: #666; margin-bottom: 12rpx; }
+.input { background-color: #fafafa; border-radius: 12rpx; padding: 20rpx; font-size: 28rpx; }
+.textarea { background-color: #fafafa; border-radius: 12rpx; padding: 20rpx; font-size: 28rpx; min-height: 160rpx; }
+.radio-row { display: flex; gap: 24rpx; align-items: center; }
+.radio { display: flex; align-items: center; gap: 8rpx; }
+.radio-dot { width: 28rpx; height: 28rpx; border-radius: 50%; border: 2rpx solid #ccc; }
+.radio-dot.active { border-color: #FF6B35; background-color: #FF6B35; }
+.picker-value { background-color: #fafafa; border-radius: 12rpx; padding: 20rpx; font-size: 28rpx; }
+.avatar-row { display: flex; align-items: center; gap: 16rpx; }
+.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; }
+.btn { background-color: #FF6B35; color: #fff; border-radius: 8rpx; padding: 16rpx 24rpx; font-size: 26rpx; }
+.tags-row { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.tag { background-color: #f5f5f5; color: #666; font-size: 26rpx; padding: 12rpx 24rpx; border-radius: 24rpx; border: 2rpx solid transparent; }
+.tag.active { background-color: #FF6B35; color: #fff; border-color: #FF6B35; }
+.actions { padding: 20rpx; }
+.save-btn { width: 100%; background-color: #FF6B35; color: #fff; border-radius: 50rpx; padding: 24rpx 0; font-size: 30rpx; }

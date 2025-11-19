@@ -39,7 +39,7 @@
     "toolkitVersion": "0.0.9",
     "useExtendedSdk": {
       "WeAppOpenFuns": true,
-      "WeAppNetwork": false,
+      "WeAppNetwork": true,
       "WeAppBluetooth": false,
       "WeAppMedia": false,
       "WeAppLBS": false,

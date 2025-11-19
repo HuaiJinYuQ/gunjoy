@@ -50,5 +50,6 @@
   },
   "appid": "wx0984426126444a5b",
   "projectname": "miniprogram-344",
-  "projectArchitecture": "multiPlatform"
+  "projectArchitecture": "multiPlatform",
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
 }

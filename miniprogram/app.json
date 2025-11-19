@@ -4,14 +4,13 @@
     "pages/concerts/concerts",
     "pages/concert-detail/concert-detail",
     "pages/profile/profile",
+    "pages/profile-edit/profile-edit",
     "pages/cases/cases",
     "pages/logs/logs",
     "pages/contact/contact"
   ],
   "window": {
-    "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "Donut · 小程序多端框架",
-    "navigationBarBackgroundColor": "#ffffff"
+    "navigationStyle": "custom"
   },
   "tabBar": {
     "color": "#8a8a8a",
