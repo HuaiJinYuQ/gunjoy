@@ -3,14 +3,14 @@
     <view class="form-item avatar-item">
       <text class="label">头像</text>
       <view class="avatar-row">
-        <image class="avatar" src="{{form.avatarUrl || '/miniprogram/images/head.png'}}"></image>
-        <button class="btn" bindtap="onChangeAvatar">更换</button>
+        <image class="avatar" src="{{form.avatarUrl || '../../images/head.png'}}"></image>
+        <button class="btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">更换</button>
       </view>
     </view>
 
     <view class="form-item">
       <text class="label">昵称</text>
-      <input class="input" value="{{form.nickname}}" bindinput="onInput" data-key="nickname" placeholder="请输入昵称" />
+      <input class="input" type="nickname" value="{{form.nickname}}" bindinput="onInput" data-key="nickname" placeholder="请输入昵称" />
     </view>
 
     <view class="form-item">

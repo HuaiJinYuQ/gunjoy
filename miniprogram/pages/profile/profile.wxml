@@ -4,8 +4,7 @@
   <view class="top-section">
     <view class="login-tip" wx:if="{{!isLoggedIn}}">
       <text>登录后可同步你的收藏与发帖</text>
-      <button class="login-btn" bindtap="getUserProfile" wx:if="{{canIUseGetUserProfile}}">微信授权登录</button>
-      <button class="login-btn" open-type="getUserInfo" bindgetuserinfo="getUserInfo" wx:else>微信授权登录</button>
+      <button class="login-btn" bindtap="onLoginClick">登录</button>
     </view>
 
     <view class="profile-card" wx:if="{{isLoggedIn}}" bindtap="goToProfileEdit">

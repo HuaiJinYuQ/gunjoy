@@ -35,7 +35,6 @@ Page({
     userInfo: null as UserInfo | null,
     dbUser: null as DBUser | null,
     hasUserInfo: false,
-    canIUseGetUserProfile: false,
     isLoggedIn: false,
     preferences: {
       genres: [],
@@ -56,27 +55,50 @@ Page({
   },
 
   onLoad() {
-    // 检查是否支持 getUserProfile
-    if (wx.getUserProfile!== undefined) {
-      this.setData({
-        canIUseGetUserProfile: true
-      });
-    }
     
-    this.tryLoadProfileFromCloud();
-    this.loadUserPreferences();
+    const cachedDbUser = wx.getStorageSync('dbUser')
+    const cachedUserInfo = wx.getStorageSync('userInfo')
+    if (cachedDbUser) {
+      this.setData({
+        dbUser: cachedDbUser,
+        isLoggedIn: true,
+        hasUserInfo: true,
+        zodiac: (cachedDbUser as any).zodiac || ''
+      })
+    } else if (cachedUserInfo) {
+      this.setData({ userInfo: cachedUserInfo })
+    }
+
+
+    if (!this.data.isLoggedIn) {
+      wx.showModal({
+        title: '微信授权登录',
+        content: '登录后可同步你的收藏与发帖',
+        success: (res) => {
+          if (res.confirm) {
+            this.onLoginClick()
+          }
+        }
+      })
+    }
   },
 
   getUserProfile() {
-    // 推荐使用 wx.getUserProfile 获取用户信息
-    wx.getUserProfile({
-      desc: '用于完善用户资料',
-      success: (res) => {
-        const profile = res.userInfo as UserInfo
-        this.setData({ userInfo: profile })
+    this.onLoginClick()
+  },
+
+  getUserInfo() {
+    this.onLoginClick()
+  },
+
+  onLoginClick() {
+    
+    wx.login({
+      success: (loginRes) => {
+        debugger
         wx.cloud.callFunction({
           name: 'user',
-          data: { type: 'userLogin', userInfo: profile }
+          data: { type: 'userLogin', loginCode: loginRes.code }
         }).then((r: any) => {
           if (r.result && r.result.code === 0) {
             const dbUser = r.result.data as DBUser
@@ -85,45 +107,24 @@ Page({
               hasUserInfo: true,
               isLoggedIn: true
             })
-            wx.setStorageSync('userInfo', profile)
-            this.initializeUserPreferences(profile)
+            wx.setStorageSync('dbUser', dbUser)
+            const city = dbUser.city || '北京'
+            const defaultPreferences = {
+              genres: ['摇滚'],
+              cities: [city],
+              priceRange: [0, 500]
+            }
+            this.setData({ preferences: defaultPreferences })
+            wx.setStorageSync('userPreferences', defaultPreferences)
           } else {
             wx.showToast({ title: '登录失败', icon: 'none' })
           }
         }).catch(() => wx.showToast({ title: '登录失败', icon: 'none' }))
       },
       fail: () => {
-        wx.showToast({
-          title: '获取用户信息失败',
-          icon: 'error'
-        });
+        wx.showToast({ title: '登录态获取失败', icon: 'none' })
       }
-    });
-  },
-
-  getUserInfo(e: any) {
-    // 兼容旧版本
-    if (e.detail.userInfo) {
-      const profile = e.detail.userInfo as UserInfo
-      this.setData({ userInfo: profile })
-      wx.cloud.callFunction({
-        name: 'user',
-        data: { type: 'userLogin', userInfo: profile }
-      }).then((r: any) => {
-        if (r.result && r.result.code === 0) {
-          const dbUser = r.result.data as DBUser
-          this.setData({
-            dbUser,
-            hasUserInfo: true,
-            isLoggedIn: true
-          })
-          wx.setStorageSync('userInfo', profile)
-          this.initializeUserPreferences(profile)
-        } else {
-          wx.showToast({ title: '登录失败', icon: 'none' })
-        }
-      }).catch(() => wx.showToast({ title: '登录失败', icon: 'none' }))
-    }
+    })
   },
 
   initializeUserPreferences(userInfo: UserInfo) {
@@ -244,6 +245,7 @@ Page({
             hasUserInfo: true,
             zodiac: (user as any).zodiac || ''
           })
+          wx.setStorageSync('dbUser', user)
         }
       })
       .catch(() => {})

@@ -32,11 +32,11 @@ Page({
       })
   },
 
-  onChangeAvatar() {
-    wx.chooseImage({ count: 1 }).then((res: any) => {
-      const path = res.tempFilePaths[0]
-      this.setData({ 'data.form.avatarUrl': path })
-    })
+  onChooseAvatar(e: any) {
+    const url = e.detail.avatarUrl
+    const form = this.data.form
+    form.avatarUrl = url
+    this.setData({ form })
   },
 
   onInput(e: any) {

@@ -20,20 +20,33 @@ exports.main = async (event, context) => {
 
 async function userLogin(event, wxContext) {
   try {
-    const { userInfo } = event
-    const openid = wxContext.OPENID
+    const { userInfo, loginCode } = event
+    let openid = wxContext.OPENID
+    let unionid = wxContext.UNIONID || null
+
+    if (loginCode) {
+      try {
+        const sess = await cloud.openapi.auth.code2Session({
+          js_code: loginCode,
+          grant_type: 'authorization_code'
+        })
+        openid = sess.openid || openid
+        unionid = sess.unionid || unionid || null
+      } catch (e) {}
+    }
     const userResult = await db.collection('users').where({ openid }).get()
     let user
     if (userResult.data.length === 0) {
       const newUser = {
         openid,
-        nickname: userInfo.nickName,
-        avatar: userInfo.avatarUrl,
-        avatarUrl: userInfo.avatarUrl,
-        gender: userInfo.gender,
-        city: userInfo.city,
-        province: userInfo.province,
-        country: userInfo.country,
+        unionid,
+        nickname: (userInfo && userInfo.nickName) || '',
+        avatar: (userInfo && userInfo.avatarUrl) || '',
+        avatarUrl: (userInfo && userInfo.avatarUrl) || '',
+        gender: (userInfo && userInfo.gender) || 0,
+        city: (userInfo && userInfo.city) || '',
+        province: (userInfo && userInfo.province) || '',
+        country: (userInfo && userInfo.country) || '',
         preferences: { genres: [], cities: [], priceRange: [0, 1000] },
         level: 1,
         badges: [],
@@ -44,14 +57,20 @@ async function userLogin(event, wxContext) {
       user = { ...newUser, _id: addResult._id }
     } else {
       user = userResult.data[0]
-      await db.collection('users').doc(user._id).update({
-        data: {
-          nickname: userInfo.nickName,
-          avatar: userInfo.avatarUrl,
-          avatarUrl: userInfo.avatarUrl,
-          updatedAt: new Date()
-        }
-      })
+      const updateData = {
+        updatedAt: new Date()
+      }
+      if (unionid) updateData.unionid = unionid
+      if (userInfo) {
+        updateData.nickname = userInfo.nickName
+        updateData.avatar = userInfo.avatarUrl
+        updateData.avatarUrl = userInfo.avatarUrl
+        updateData.gender = userInfo.gender
+        updateData.city = userInfo.city
+        updateData.province = userInfo.province
+        updateData.country = userInfo.country
+      }
+      await db.collection('users').doc(user._id).update({ data: updateData })
     }
     return { code: 0, data: user, message: '登录成功' }
   } catch (error) {
