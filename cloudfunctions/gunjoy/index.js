@@ -16,12 +16,9 @@ exports.main = async (event, context) => {
       return await getConcerts(event, wxContext)
     case 'getConcertDetail':
       return await getConcertDetail(event, wxContext)
-    case 'userLogin':
-      return await userLogin(event, wxContext)
-    case 'userGetProfile':
-      return await userGetProfile(event, wxContext)
-    case 'userUpdateProfile':
-      return await userUpdateProfile(event, wxContext)
+    
+    
+    
     case 'publishComment':
       return await publishComment(event, wxContext)
     case 'favoriteConcert':

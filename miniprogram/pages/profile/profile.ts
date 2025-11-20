@@ -75,7 +75,7 @@ Page({
         const profile = res.userInfo as UserInfo
         this.setData({ userInfo: profile })
         wx.cloud.callFunction({
-          name: 'gunjoy',
+          name: 'user',
           data: { type: 'userLogin', userInfo: profile }
         }).then((r: any) => {
           if (r.result && r.result.code === 0) {
@@ -107,7 +107,7 @@ Page({
       const profile = e.detail.userInfo as UserInfo
       this.setData({ userInfo: profile })
       wx.cloud.callFunction({
-        name: 'gunjoy',
+        name: 'user',
         data: { type: 'userLogin', userInfo: profile }
       }).then((r: any) => {
         if (r.result && r.result.code === 0) {
@@ -234,7 +234,7 @@ Page({
   },
 
   tryLoadProfileFromCloud() {
-    wx.cloud.callFunction({ name: 'gunjoy', data: { type: 'userGetProfile' } })
+    wx.cloud.callFunction({ name: 'user', data: { type: 'userGetProfile' } })
       .then((r: any) => {
         if (r.result && r.result.code === 0) {
           const user = r.result.data as DBUser
@@ -282,7 +282,7 @@ Page({
   onAbout() {
     wx.showModal({
       title: '关于滚聚',
-      content: '滚聚 - 摇滚乐迷的专属社区\n让每一次摇滚现场都充满回忆\n版本：v1.0.0',
+      content: '滚聚 - 摇滚的人，终会相聚\n版本：v1.0.0',
       showCancel: false
     });
   }

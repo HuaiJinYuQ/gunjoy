@@ -1,0 +1,124 @@
+const cloud = require('wx-server-sdk')
+
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+
+const db = cloud.database()
+
+exports.main = async (event, context) => {
+  const wxContext = cloud.getWXContext()
+  switch (event.type) {
+    case 'userLogin':
+      return await userLogin(event, wxContext)
+    case 'userGetProfile':
+      return await userGetProfile(event, wxContext)
+    case 'userUpdateProfile':
+      return await userUpdateProfile(event, wxContext)
+    default:
+      return { code: -1, message: '未知操作类型' }
+  }
+}
+
+async function userLogin(event, wxContext) {
+  try {
+    const { userInfo } = event
+    const openid = wxContext.OPENID
+    const userResult = await db.collection('users').where({ openid }).get()
+    let user
+    if (userResult.data.length === 0) {
+      const newUser = {
+        openid,
+        nickname: userInfo.nickName,
+        avatar: userInfo.avatarUrl,
+        avatarUrl: userInfo.avatarUrl,
+        gender: userInfo.gender,
+        city: userInfo.city,
+        province: userInfo.province,
+        country: userInfo.country,
+        preferences: { genres: [], cities: [], priceRange: [0, 1000] },
+        level: 1,
+        badges: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      const addResult = await db.collection('users').add({ data: newUser })
+      user = { ...newUser, _id: addResult._id }
+    } else {
+      user = userResult.data[0]
+      await db.collection('users').doc(user._id).update({
+        data: {
+          nickname: userInfo.nickName,
+          avatar: userInfo.avatarUrl,
+          avatarUrl: userInfo.avatarUrl,
+          updatedAt: new Date()
+        }
+      })
+    }
+    return { code: 0, data: user, message: '登录成功' }
+  } catch (error) {
+    return { code: -1, message: error.message }
+  }
+}
+
+async function userGetProfile(event, wxContext) {
+  try {
+    const openid = wxContext.OPENID
+    const userResult = await db.collection('users').where({ openid }).get()
+    if (userResult.data.length === 0) {
+      return { code: -1, message: '用户不存在' }
+    }
+    const user = userResult.data[0]
+    const age = calcAge(user.birthday)
+    const zodiac = calcZodiac(user.birthday)
+    return { code: 0, data: { ...user, age, zodiac }, message: '获取成功' }
+  } catch (error) {
+    return { code: -1, message: error.message }
+  }
+}
+
+async function userUpdateProfile(event, wxContext) {
+  try {
+    const openid = wxContext.OPENID
+    const fields = {}
+    const allow = ['nickname','avatarUrl','avatar','gender','birthday','city','province','signature','tags']
+    allow.forEach(k => { if (event[k] !== undefined) fields[k] = event[k] })
+    const userResult = await db.collection('users').where({ openid }).get()
+    if (userResult.data.length === 0) {
+      return { code: -1, message: '用户不存在' }
+    }
+    const user = userResult.data[0]
+    await db.collection('users').doc(user._id).update({ data: { ...fields, updatedAt: new Date() } })
+    const latest = await db.collection('users').doc(user._id).get()
+    const age = calcAge(latest.data.birthday)
+    const zodiac = calcZodiac(latest.data.birthday)
+    return { code: 0, data: { ...latest.data, age, zodiac }, message: '更新成功' }
+  } catch (error) {
+    return { code: -1, message: error.message }
+  }
+}
+
+function calcAge(birthday) {
+  if (!birthday) return null
+  const b = new Date(birthday)
+  const now = new Date()
+  let age = now.getFullYear() - b.getFullYear()
+  const m = now.getMonth() - b.getMonth()
+  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--
+  return age
+}
+
+function calcZodiac(birthday) {
+  if (!birthday) return null
+  const b = new Date(birthday)
+  const m = b.getMonth() + 1
+  const d = b.getDate()
+  const ranges = [
+    ['摩羯座', 12, 22, 1, 19], ['水瓶座', 1, 20, 2, 18], ['双鱼座', 2, 19, 3, 20],
+    ['牡羊座', 3, 21, 4, 19], ['金牛座', 4, 20, 5, 20], ['双子座', 5, 21, 6, 21],
+    ['巨蟹座', 6, 22, 7, 22], ['狮子座', 7, 23, 8, 22], ['处女座', 8, 23, 9, 22],
+    ['天秤座', 9, 23, 10, 23], ['天蝎座', 10, 24, 11, 22], ['射手座', 11, 23, 12, 21]
+  ]
+  for (const [name, sm, sd, em, ed] of ranges) {
+    if ((m === sm && d >= sd) || (m === em && d <= ed)) return name
+  }
+  return null
+}

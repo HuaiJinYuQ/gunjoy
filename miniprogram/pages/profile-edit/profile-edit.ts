@@ -13,7 +13,7 @@ Page({
   },
 
   onLoad() {
-    wx.cloud.callFunction({ name: 'gunjoy', data: { type: 'userGetProfile' } })
+    wx.cloud.callFunction({ name: 'user', data: { type: 'userGetProfile' } })
       .then((r: any) => {
         if (r.result && r.result.code === 0) {
           const u = r.result.data
@@ -73,7 +73,7 @@ Page({
   onSave() {
     const f = this.data.form
     wx.cloud.callFunction({
-      name: 'gunjoy',
+      name: 'user',
       data: {
         type: 'userUpdateProfile',
         nickname: f.nickname,

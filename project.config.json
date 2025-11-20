@@ -51,5 +51,9 @@
   "appid": "wx0984426126444a5b",
   "projectname": "miniprogram-344",
   "projectArchitecture": "multiPlatform",
-  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "cloudbaseConfig": {
+    "env": "cloud1-8g1y8rxw95040b45"
+  }
 }
