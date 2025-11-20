@@ -92,7 +92,6 @@ Page({
   },
 
   onLoginClick() {
-    
     wx.login({
       success: (loginRes) => {
         debugger
@@ -114,7 +113,7 @@ Page({
               cities: [city],
               priceRange: [0, 500]
             }
-            this.setData({ preferences: defaultPreferences })
+            this.setData({ preferences: defaultPreferences as UserPreferences })
             wx.setStorageSync('userPreferences', defaultPreferences)
           } else {
             wx.showToast({ title: '登录失败', icon: 'none' })
@@ -252,6 +251,10 @@ Page({
   },
 
   goToProfileEdit() {
+    if (!this.data.isLoggedIn) {
+      wx.showToast({ title: '请先登录', icon: 'none' })
+      return
+    }
     wx.navigateTo({ url: '/pages/profile-edit/profile-edit' })
   },
 
@@ -279,6 +282,38 @@ Page({
       title: '功能开发中',
       icon: 'none'
     });
+  },
+
+  onConcertOrders() {
+    wx.showToast({ title: '演出订单开发中', icon: 'none' })
+  },
+
+  onCrowdOrders() {
+    wx.showToast({ title: '众筹订单开发中', icon: 'none' })
+  },
+
+  onMerchOrders() {
+    wx.showToast({ title: '周边订单开发中', icon: 'none' })
+  },
+
+  onAddress() {
+    wx.showToast({ title: '收货地址开发中', icon: 'none' })
+  },
+
+  onAudience() {
+    wx.showToast({ title: '常用观演人开发中', icon: 'none' })
+  },
+
+  onCoupons() {
+    wx.showToast({ title: '优惠券开发中', icon: 'none' })
+  },
+
+  onHelpCenter() {
+    wx.showToast({ title: '帮助中心开发中', icon: 'none' })
+  },
+
+  onCustomerService() {
+    wx.showToast({ title: '客服电话开发中', icon: 'none' })
   },
 
   onAbout() {

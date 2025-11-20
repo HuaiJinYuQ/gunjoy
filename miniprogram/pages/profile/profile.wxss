@@ -165,8 +165,8 @@
 /* 菜单区域 */
 .menu-section {
   background-color: white;
-  margin: 20rpx;
-  border-radius: 16rpx;
+  margin: 0;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -197,7 +197,7 @@
   opacity: 0.4;
   transform: rotate(-90deg);
 }
-.top-section { padding: 20rpx; }
+.top-section { padding: 0; margin-bottom: 16rpx; }
 .login-tip { background-color: #fff; border-radius: 16rpx; padding: 24rpx; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
 .profile-card { background-color: #fff; border-radius: 16rpx; padding: 24rpx; display: flex; align-items: center; }
 .profile-card .avatar { border: none; margin-bottom: 0; margin-right: 20rpx; }
@@ -208,11 +208,20 @@
 .meta-sep { color: #ccc; }
 .edit-arrow { font-size: 40rpx; color: #ccc; }
 
-.grid-section { margin: 20rpx; background-color: #fff; border-radius: 16rpx; padding: 16rpx; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16rpx; }
-.grid-item { background-color: #fafafa; border-radius: 12rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32rpx 0; }
-.grid-icon { font-size: 36rpx; color: #FF6B35; margin-bottom: 12rpx; }
+.grid-section { margin: 0; background-color: #fff; border-radius: 0; padding: 16rpx; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16rpx; }
+.grid-item { background-color: #fafafa; border-radius: 12rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36rpx 0; }
+.grid-icon { font-size: 40rpx; color: #333; margin-bottom: 12rpx; }
 .grid-text { font-size: 28rpx; color: #333; }
 
-.about-section { margin: 20rpx; background-color: #fff; border-radius: 16rpx; padding: 24rpx; text-align: center; color: #666; }
+.about-section { margin: 0; background-color: #fff; border-radius: 0; padding: 24rpx; text-align: center; color: #666; }
 .about-title { font-size: 28rpx; color: #333; display: block; margin-bottom: 8rpx; }
 .about-desc { font-size: 24rpx; }
+
+/* 页头 */
+.page-header { padding: 24rpx; display: flex; justify-content: center; align-items: center; background-color: #fff; border-bottom: 1rpx solid #f0f0f0; }
+.page-title { font-size: 32rpx; color: #333; font-weight: 600; }
+
+/* 底部登录弹窗 */
+.login-bottom-sheet { position: fixed; left: 20rpx; right: 20rpx; bottom: 20rpx; background-color: #fff; border-radius: 16rpx; box-shadow: 0 12rpx 32rpx rgba(0,0,0,0.12); padding: 24rpx; display: flex; align-items: center; justify-content: space-between; z-index: 1000; padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); }
+.sheet-title { font-size: 28rpx; color: #333; }
+.sheet-btn { background-color: #FF6B35; color: #fff; border: none; border-radius: 12rpx; padding: 20rpx 32rpx; font-size: 28rpx; }

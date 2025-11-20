@@ -40,7 +40,7 @@ async function userLogin(event, wxContext) {
       const newUser = {
         openid,
         unionid,
-        nickname: (userInfo && userInfo.nickName) || '',
+        nickname: (userInfo && userInfo.nickName) || 'momo',
         avatar: (userInfo && userInfo.avatarUrl) || '',
         avatarUrl: (userInfo && userInfo.avatarUrl) || '',
         gender: (userInfo && userInfo.gender) || 0,

@@ -1,16 +1,14 @@
 <!--miniprogram/pages/profile/profile.wxml-->
 <view class="container">
-  <!-- 顶部信息与登录引导 -->
-  <view class="top-section">
-    <view class="login-tip" wx:if="{{!isLoggedIn}}">
-      <text>登录后可同步你的收藏与发帖</text>
-      <button class="login-btn" bindtap="onLoginClick">登录</button>
-    </view>
+  <!-- 页面标题 -->
+  <view class="page-header"><text class="page-title">我的</text></view>
 
-    <view class="profile-card" wx:if="{{isLoggedIn}}" bindtap="goToProfileEdit">
+  <!-- 顶部信息卡片 -->
+  <view class="top-section">
+    <view class="profile-card" bindtap="goToProfileEdit">
       <image class="avatar" src="{{(dbUser && (dbUser.avatarUrl || dbUser.avatar)) || (userInfo && userInfo.avatarUrl) || '../../images/head.png'}}"></image>
       <view class="profile-meta">
-        <text class="nickname">{{(dbUser && dbUser.nickname) || (userInfo && userInfo.nickName) || '未命名用户'}}</text>
+        <text class="nickname">{{(dbUser && dbUser.nickname) || (userInfo && userInfo.nickName) || '未登录'}}</text>
         <view class="meta-row">
           <text class="meta-item">{{dbUser && dbUser.age ? dbUser.age + '岁' : '年龄未设置'}}</text>
           <text class="meta-sep">·</text>
@@ -24,46 +22,49 @@
   </view>
 
   <!-- 中部网格功能 -->
-  <view class="grid-section" wx:if="{{isLoggedIn}}">
-    <view class="grid-item" bindtap="onMyPosts">
-      <text class="grid-icon">📝</text>
-      <text class="grid-text">我的发帖</text>
+  <view class="grid-section">
+    <view class="grid-item" bindtap="onConcertOrders">
+      <text class="grid-icon">📋</text>
+      <text class="grid-text">演出订单</text>
     </view>
-    <view class="grid-item" bindtap="onMyFavorites">
-      <text class="grid-icon">★</text>
-      <text class="grid-text">我的收藏</text>
+    <view class="grid-item" bindtap="onCrowdOrders">
+      <text class="grid-icon">🌱</text>
+      <text class="grid-text">众筹订单</text>
     </view>
-    <view class="grid-item" bindtap="onFeedback">
-      <text class="grid-icon">💬</text>
-      <text class="grid-text">意见反馈</text>
-    </view>
-    <view class="grid-item" bindtap="onSettings">
-      <text class="grid-icon">⚙️</text>
-      <text class="grid-text">设置</text>
+    <view class="grid-item" bindtap="onMerchOrders">
+      <text class="grid-icon">🛍️</text>
+      <text class="grid-text">周边订单</text>
     </view>
   </view>
 
- 
+  
   <!-- 功能菜单 -->
   <view class="menu-section">
-    <view class="menu-item" bindtap="onMyFavorites" wx:if="{{isLoggedIn}}">
-      <text class="menu-text">我的收藏</text>
+    <view class="menu-item" bindtap="onAddress">
+      <text class="menu-text">收货地址</text>
       <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
     </view>
-    
-    <view class="menu-item" bindtap="onMyNotes" wx:if="{{isLoggedIn}}">
-      <text class="menu-text">我的笔记</text>
+    <view class="menu-item" bindtap="onAudience">
+      <text class="menu-text">常用观演人</text>
       <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
     </view>
-    
-    <view  class="about-section"  bindtap="onAbout">
-      <text class="about-title">关于滚聚 GunJoy</text>
-      <text class="about-desc">摇滚乐迷的专属社区 · 版本 v1.0.0</text>
-    </view>
-    
-    <view class="menu-item" bindtap="onLogout" wx:if="{{isLoggedIn}}">
-      <text class="menu-text logout-text">退出登录</text>
+    <view class="menu-item" bindtap="onCoupons">
+      <text class="menu-text">优惠券</text>
       <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
     </view>
+    <view class="menu-item" bindtap="onHelpCenter">
+      <text class="menu-text">帮助中心</text>
+      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
+    </view>
+    <view class="menu-item" bindtap="onCustomerService">
+      <text class="menu-text">客服电话</text>
+      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
+    </view>
+  </view>
+
+  <!-- 底部登录弹窗 -->
+  <view class="login-bottom-sheet" wx:if="{{!isLoggedIn}}">
+    <text class="sheet-title">登录后可同步你的收藏与发帖</text>
+    <button class="sheet-btn" bindtap="onLoginClick">微信身份登录</button>
   </view>
 </view>
