@@ -2,6 +2,18 @@
 .container {
   background-color: #f5f5f5;
   min-height: 100vh;
+  padding: 20rpx;
+}
+
+.container,
+.page-header,
+.top-section,
+.grid-section,
+.menu-section,
+.about-section,
+.profile-card {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* 用户信息区域 */
@@ -218,8 +230,6 @@
 .about-desc { font-size: 24rpx; }
 
 /* 页头 */
-.page-header { padding: 24rpx; display: flex; justify-content: center; align-items: center; background-color: #fff; border-bottom: 1rpx solid #f0f0f0; }
-.page-title { font-size: 32rpx; color: #333; font-weight: 600; }
 
 /* 底部登录弹窗 */
 .login-bottom-sheet { position: fixed; left: 20rpx; right: 20rpx; bottom: 20rpx; background-color: #fff; border-radius: 16rpx; box-shadow: 0 12rpx 32rpx rgba(0,0,0,0.12); padding: 24rpx; display: flex; align-items: center; justify-content: space-between; z-index: 1000; padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); }

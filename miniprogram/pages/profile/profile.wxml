@@ -1,15 +1,14 @@
 <!--miniprogram/pages/profile/profile.wxml-->
 <view class="container">
-  <!-- 页面标题 -->
-  <view class="page-header"><text class="page-title">我的</text></view>
 
   <!-- 顶部信息卡片 -->
-  <view class="top-section">
-    <view class="profile-card" bindtap="goToProfileEdit">
+  <view class="top-section" style="padding-top: {{statusBarHeight}}px">
+
+    <view class="profile-card" bindtap="goToProfileEdit" style="min-height: {{navContentHeight}}px">
       <image class="avatar" src="{{(dbUser && (dbUser.avatarUrl || dbUser.avatar)) || (userInfo && userInfo.avatarUrl) || '../../images/head.png'}}"></image>
       <view class="profile-meta">
         <text class="nickname">{{(dbUser && dbUser.nickname) || (userInfo && userInfo.nickName) || '未登录'}}</text>
-        <view class="meta-row">
+        <view class="meta-row" wx:if="{{isLoggedIn}}">
           <text class="meta-item">{{dbUser && dbUser.age ? dbUser.age + '岁' : '年龄未设置'}}</text>
           <text class="meta-sep">·</text>
           <text class="meta-item">{{zodiac || '星座未设置'}}</text>
@@ -22,7 +21,7 @@
   </view>
 
   <!-- 中部网格功能 -->
-  <view class="grid-section">
+  <view class="grid-section" style="width: 100%">
     <view class="grid-item" bindtap="onConcertOrders">
       <text class="grid-icon">📋</text>
       <text class="grid-text">演出订单</text>

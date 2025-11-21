@@ -36,6 +36,8 @@ Page({
     dbUser: null as DBUser | null,
     hasUserInfo: false,
     isLoggedIn: false,
+    statusBarHeight: 0,
+    navContentHeight: 44,
     preferences: {
       genres: [],
       cities: [],
@@ -55,6 +57,9 @@ Page({
   },
 
   onLoad() {
+    const sys = wx.getSystemInfoSync()
+    const statusBarHeight = sys.statusBarHeight || 0
+    this.setData({ statusBarHeight })
     
     const cachedDbUser = wx.getStorageSync('dbUser')
     const cachedUserInfo = wx.getStorageSync('userInfo')

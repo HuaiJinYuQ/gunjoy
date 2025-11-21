@@ -1,7 +1,6 @@
 <!--index.wxml-->
 <scroll-view class="scrollarea" scroll-y type="list" bindscrolltolower="onReachBottom">
   <view class="container">
-    
 
     
 
