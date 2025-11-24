@@ -13,6 +13,8 @@ exports.main = async (event, context) => {
       return await userGetProfile(event, wxContext)
     case 'userUpdateProfile':
       return await userUpdateProfile(event, wxContext)
+    case 'userGetProfileById':
+      return await userGetProfileById(event, wxContext)
     default:
       return { code: -1, message: '未知操作类型' }
   }
@@ -34,43 +36,17 @@ async function userLogin(event, wxContext) {
         unionid = sess.unionid || unionid || null
       } catch (e) {}
     }
+    if (!openid) {
+      return { code: -1, message: '缺少openid' }
+    }
     const userResult = await db.collection('users').where({ openid }).get()
     let user
     if (userResult.data.length === 0) {
-      const newUser = {
-        openid,
-        unionid,
-        nickname: (userInfo && userInfo.nickName) || 'momo',
-        avatar: (userInfo && userInfo.avatarUrl) || '',
-        avatarUrl: (userInfo && userInfo.avatarUrl) || '',
-        gender: (userInfo && userInfo.gender) || 0,
-        city: (userInfo && userInfo.city) || '',
-        province: (userInfo && userInfo.province) || '',
-        country: (userInfo && userInfo.country) || '',
-        preferences: { genres: [], cities: [], priceRange: [0, 1000] },
-        level: 1,
-        badges: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
+      const newUser = { openid, unionid, createdAt: new Date(), updatedAt: new Date() }
       const addResult = await db.collection('users').add({ data: newUser })
       user = { ...newUser, _id: addResult._id }
     } else {
       user = userResult.data[0]
-      const updateData = {
-        updatedAt: new Date()
-      }
-      if (unionid) updateData.unionid = unionid
-      if (userInfo) {
-        updateData.nickname = userInfo.nickName
-        updateData.avatar = userInfo.avatarUrl
-        updateData.avatarUrl = userInfo.avatarUrl
-        updateData.gender = userInfo.gender
-        updateData.city = userInfo.city
-        updateData.province = userInfo.province
-        updateData.country = userInfo.country
-      }
-      await db.collection('users').doc(user._id).update({ data: updateData })
     }
     return { code: 0, data: user, message: '登录成功' }
   } catch (error) {
@@ -100,6 +76,9 @@ async function userUpdateProfile(event, wxContext) {
     const fields = {}
     const allow = ['nickname','avatarUrl','avatar','gender','birthday','city','province','signature','tags']
     allow.forEach(k => { if (event[k] !== undefined) fields[k] = event[k] })
+    if (Object.keys(fields).length === 0) {
+      return { code: -1, message: '无可更新字段' }
+    }
     const userResult = await db.collection('users').where({ openid }).get()
     if (userResult.data.length === 0) {
       return { code: -1, message: '用户不存在' }
@@ -110,6 +89,24 @@ async function userUpdateProfile(event, wxContext) {
     const age = calcAge(latest.data.birthday)
     const zodiac = calcZodiac(latest.data.birthday)
     return { code: 0, data: { ...latest.data, age, zodiac }, message: '更新成功' }
+  } catch (error) {
+    return { code: -1, message: error.message }
+  }
+}
+
+async function userGetProfileById(event, wxContext) {
+  try {
+    const { id } = event
+    if (!id) {
+      return { code: -1, message: '缺少id' }
+    }
+    const latest = await db.collection('users').doc(id).get()
+    if (!latest.data) {
+      return { code: -1, message: '用户不存在' }
+    }
+    const age = calcAge(latest.data.birthday)
+    const zodiac = calcZodiac(latest.data.birthday)
+    return { code: 0, data: { ...latest.data, age, zodiac }, message: '获取成功' }
   } catch (error) {
     return { code: -1, message: error.message }
   }

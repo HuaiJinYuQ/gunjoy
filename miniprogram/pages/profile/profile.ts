@@ -57,36 +57,53 @@ Page({
   },
 
   onLoad() {
-    const sys = wx.getSystemInfoSync()
-    const statusBarHeight = sys.statusBarHeight || 0
+    const info: any = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
+    const statusBarHeight = info && info.statusBarHeight ? info.statusBarHeight : 0
     this.setData({ statusBarHeight })
-    
-    const cachedDbUser = wx.getStorageSync('dbUser')
-    const cachedUserInfo = wx.getStorageSync('userInfo')
-    if (cachedDbUser) {
-      this.setData({
-        dbUser: cachedDbUser,
-        isLoggedIn: true,
-        hasUserInfo: true,
-        zodiac: (cachedDbUser as any).zodiac || ''
-      })
-    } else if (cachedUserInfo) {
-      this.setData({ userInfo: cachedUserInfo })
-    }
-
-
-    if (!this.data.isLoggedIn) {
-      wx.showModal({
-        title: '微信授权登录',
-        content: '登录后可同步你的收藏与发帖',
-        success: (res) => {
-          if (res.confirm) {
-            this.onLoginClick()
-          }
-        }
-      })
-    }
+    this.checkLoginStatus().then(() => {
+      if (this.data.isLoggedIn) this.tryLoadProfileFromCloud()
+    })
   },
+
+  //#region 用户登录与缓存
+  checkLoginStatus(): Promise<any> {
+    return new Promise((resolve) => {
+      const loginInfo = wx.getStorageSync('loginInfo')
+      const now = Date.now()
+      if (loginInfo && loginInfo.expireTime && now < loginInfo.expireTime && (loginInfo.dbUser || loginInfo.userId)) {
+        if (loginInfo.dbUser) {
+          const dbUser = loginInfo.dbUser as DBUser
+          this.setData({ dbUser, isLoggedIn: true, hasUserInfo: true })
+          wx.setStorageSync('dbUser', dbUser)
+          if ((dbUser as any)._id) wx.setStorageSync('dbUserId', (dbUser as any)._id)
+          this.initializeUserPreferencesFromDb(dbUser)
+          resolve(loginInfo)
+        } else if (loginInfo.userId) {
+          wx.cloud.callFunction({ name: 'user', data: { type: 'userGetProfileById', id: loginInfo.userId } })
+            .then((r: any) => {
+              if (r.result && r.result.code === 0) {
+                const user = r.result.data as DBUser
+                this.setData({ dbUser: user, isLoggedIn: true, hasUserInfo: true, zodiac: (user as any).zodiac || '' })
+                wx.setStorageSync('dbUser', user)
+                if ((user as any)._id) wx.setStorageSync('dbUserId', (user as any)._id)
+                this.initializeUserPreferencesFromDb(user)
+                resolve({ ...loginInfo, dbUser: user })
+              } else {
+                wx.removeStorageSync('loginInfo')
+                this.performLogin().then(resolve).catch(() => resolve(null))
+              }
+            })
+            .catch(() => { wx.removeStorageSync('loginInfo'); this.performLogin().then(resolve).catch(() => resolve(null)) })
+        }
+      } else {
+        wx.removeStorageSync('loginInfo')
+        this.performLogin().then(resolve).catch(() => resolve(null))
+      }
+    })
+  },
+
+
+  
 
   getUserProfile() {
     this.onLoginClick()
@@ -97,38 +114,7 @@ Page({
   },
 
   onLoginClick() {
-    wx.login({
-      success: (loginRes) => {
-        debugger
-        wx.cloud.callFunction({
-          name: 'user',
-          data: { type: 'userLogin', loginCode: loginRes.code }
-        }).then((r: any) => {
-          if (r.result && r.result.code === 0) {
-            const dbUser = r.result.data as DBUser
-            this.setData({
-              dbUser,
-              hasUserInfo: true,
-              isLoggedIn: true
-            })
-            wx.setStorageSync('dbUser', dbUser)
-            const city = dbUser.city || '北京'
-            const defaultPreferences = {
-              genres: ['摇滚'],
-              cities: [city],
-              priceRange: [0, 500]
-            }
-            this.setData({ preferences: defaultPreferences as UserPreferences })
-            wx.setStorageSync('userPreferences', defaultPreferences)
-          } else {
-            wx.showToast({ title: '登录失败', icon: 'none' })
-          }
-        }).catch(() => wx.showToast({ title: '登录失败', icon: 'none' }))
-      },
-      fail: () => {
-        wx.showToast({ title: '登录态获取失败', icon: 'none' })
-      }
-    })
+    this.performLogin()
   },
 
   initializeUserPreferences(userInfo: UserInfo) {
@@ -207,6 +193,7 @@ Page({
     wx.setStorageSync('userPreferences', preferences);
   },
 
+
   onLogout() {
     wx.showModal({
       title: '退出登录',
@@ -239,7 +226,9 @@ Page({
   },
 
   tryLoadProfileFromCloud() {
-    wx.cloud.callFunction({ name: 'user', data: { type: 'userGetProfile' } })
+    const id = wx.getStorageSync('dbUserId')
+    const req = id ? { type: 'userGetProfileById', id } : { type: 'userGetProfile' }
+    wx.cloud.callFunction({ name: 'user', data: req })
       .then((r: any) => {
         if (r.result && r.result.code === 0) {
           const user = r.result.data as DBUser
@@ -250,10 +239,56 @@ Page({
             zodiac: (user as any).zodiac || ''
           })
           wx.setStorageSync('dbUser', user)
+          if ((user as any)._id) wx.setStorageSync('dbUserId', (user as any)._id)
+          this.initializeUserPreferencesFromDb(user)
+        } else {
+          wx.showToast({ title: '资料获取失败', icon: 'none' })
         }
       })
-      .catch(() => {})
+      .catch(() => { wx.showToast({ title: '资料获取失败', icon: 'none' }) })
   },
+
+
+
+  performLogin(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      wx.login({
+        success: (loginRes) => {
+          wx.cloud.callFunction({ name: 'user', data: { type: 'userLogin', loginCode: loginRes.code } })
+            .then((r: any) => {
+              if (r.result && r.result.code === 0) {
+                const dbUser = r.result.data as DBUser
+                this.setData({ dbUser, hasUserInfo: true, isLoggedIn: true })
+                wx.setStorageSync('dbUser', dbUser)
+                if ((dbUser as any)._id) wx.setStorageSync('dbUserId', (dbUser as any)._id)
+                const expireTime = Date.now() + 7 * 24 * 60 * 60 * 1000
+                const loginInfo = { userId: (dbUser as any)._id, expireTime, dbUser }
+                wx.setStorageSync('loginInfo', loginInfo)
+                this.initializeUserPreferencesFromDb(dbUser)
+                resolve(loginInfo)
+              } else {
+                wx.showToast({ title: '登录失败', icon: 'none' })
+                reject(new Error('login failed'))
+              }
+            })
+            .catch((e: any) => { wx.showToast({ title: '登录失败', icon: 'none' }); reject(e) })
+        },
+        fail: () => { wx.showToast({ title: '登录态获取失败', icon: 'none' }); reject(new Error('wx.login failed')) }
+      })
+    })
+  },
+  //#endregion
+
+  initializeUserPreferencesFromDb(dbUser: any) {
+    const existing = wx.getStorageSync('userPreferences')
+    if (existing) return
+    const city = (dbUser && dbUser.city) || '北京'
+    const defaultPreferences: UserPreferences = { genres: ['摇滚'], cities: [city], priceRange: [0, 500] }
+    this.setData({ preferences: defaultPreferences })
+    wx.setStorageSync('userPreferences', defaultPreferences)
+  },
+
+  
 
   goToProfileEdit() {
     if (!this.data.isLoggedIn) {
