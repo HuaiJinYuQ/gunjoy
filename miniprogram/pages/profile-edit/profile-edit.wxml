@@ -43,7 +43,7 @@
     </view>
 
     <view class="form-item">
-      <text class="label">音乐标签</text>
+      <text class="label">音乐标1签</text>
       <view class="tags-row">
         <view wx:for="{{allTags}}" wx:for-item="tag" wx:for-index="idx" wx:key="*this" class="tag {{form.tags.indexOf(tag) > -1 ? 'active' : ''}}" data-index="{{idx}}" bindtap="onTagToggle">{{tag}}</view>
       </view>
