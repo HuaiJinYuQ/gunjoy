@@ -3,6 +3,7 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const db = cloud.database()
+let zodiacRangesCache = null
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
@@ -63,7 +64,7 @@ async function userGetProfile(event, wxContext) {
     }
     const user = userResult.data[0]
     const age = calcAge(user.birthday)
-    const zodiac = calcZodiac(user.birthday)
+    const zodiac = await getZodiacName(user.birthday)
     return { code: 0, data: { ...user, age, zodiac }, message: '获取成功' }
   } catch (error) {
     return { code: -1, message: error.message }
@@ -87,7 +88,7 @@ async function userUpdateProfile(event, wxContext) {
     await db.collection('users').doc(user._id).update({ data: { ...fields, updatedAt: new Date() } })
     const latest = await db.collection('users').doc(user._id).get()
     const age = calcAge(latest.data.birthday)
-    const zodiac = calcZodiac(latest.data.birthday)
+    const zodiac = await getZodiacName(latest.data.birthday)
     return { code: 0, data: { ...latest.data, age, zodiac }, message: '更新成功' }
   } catch (error) {
     return { code: -1, message: error.message }
@@ -122,7 +123,7 @@ function calcAge(birthday) {
   return age
 }
 
-function calcZodiac(birthday) {
+function calcZodiacFallback(birthday) {
   if (!birthday) return null
   const b = new Date(birthday)
   const m = b.getMonth() + 1
@@ -137,4 +138,28 @@ function calcZodiac(birthday) {
     if ((m === sm && d >= sd) || (m === em && d <= ed)) return name
   }
   return null
+}
+
+async function getZodiacName(birthday) {
+  if (!birthday) return null
+  if (!zodiacRangesCache) {
+    const r = await db.collection('sys_config').where({ type: 'zodiac_ranges' }).orderBy('updatedAt', 'desc').limit(1).get()
+    zodiacRangesCache = r.data.length ? r.data[0].data : null
+  }
+  if (Array.isArray(zodiacRangesCache) && zodiacRangesCache.length) {
+    const b = new Date(birthday)
+    const m = b.getMonth() + 1
+    const d = b.getDate()
+    for (const item of zodiacRangesCache) {
+      const sm = item.start && item.start.m
+      const sd = item.start && item.start.d
+      const em = item.end && item.end.m
+      const ed = item.end && item.end.d
+      if (sm && sd && em && ed) {
+        if ((m === sm && d >= sd) || (m === em && d <= ed)) return item.name
+      }
+    }
+    return null
+  }
+  return calcZodiacFallback(birthday)
 }

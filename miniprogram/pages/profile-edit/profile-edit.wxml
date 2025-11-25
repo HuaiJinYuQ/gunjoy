@@ -16,27 +16,25 @@
     <view class="form-item">
       <text class="label">性别</text>
       <view class="radio-row">
-        <label class="radio" bindtap="onGenderSelect" data-value="1">
-          <view class="radio-dot {{form.gender === 1 ? 'active' : ''}}"></view>
-          <text>男</text>
-        </label>
-        <label class="radio" bindtap="onGenderSelect" data-value="2">
-          <view class="radio-dot {{form.gender === 2 ? 'active' : ''}}"></view>
-          <text>女</text>
+        <label class="radio" wx:for="{{genders}}" wx:key="value" bindtap="onGenderSelect" data-value="{{item.value}}">
+          <view class="radio-dot {{form.gender === item.value ? 'active' : ''}}"></view>
+          <text>{{item.label}}</text>
         </label>
       </view>
     </view>
 
     <view class="form-item">
       <text class="label">生日</text>
-      <picker mode="date" value="{{form.birthday || '1998-01-01'}}" bindchange="onBirthdayChange">
+      <picker mode="date" value="{{form.birthday || '2000-01-01'}}" bindchange="onBirthdayChange">
         <view class="picker-value">{{form.birthday || '请选择生日'}}</view>
       </picker>
     </view>
 
     <view class="form-item">
       <text class="label">城市</text>
-      <input class="input" value="{{form.city}}" bindinput="onInput" data-key="city" placeholder="请输入城市" />
+      <picker mode="selector" range="{{cities}}" bindchange="onCityPick">
+        <view class="picker-value">{{form.city || '请选择城市'}}</view>
+      </picker>
     </view>
 
     <view class="form-item">
@@ -47,7 +45,7 @@
     <view class="form-item">
       <text class="label">音乐标签</text>
       <view class="tags-row">
-        <view wx:for="{{allTags}}" wx:key="*this" class="tag {{form.tags.indexOf(item) > -1 ? 'active' : ''}}" data-index="{{index}}" bindtap="onTagToggle">{{item}}</view>
+        <view wx:for="{{allTags}}" wx:for-item="tag" wx:for-index="idx" wx:key="*this" class="tag {{form.tags.indexOf(tag) > -1 ? 'active' : ''}}" data-index="{{idx}}" bindtap="onTagToggle">{{tag}}</view>
       </view>
     </view>
   </view>

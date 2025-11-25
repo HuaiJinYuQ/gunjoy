@@ -62,6 +62,7 @@ Page({
     this.setData({ statusBarHeight })
     this.checkLoginStatus().then(() => {
       if (this.data.isLoggedIn) this.tryLoadProfileFromCloud()
+      this.loadSysConfig()
     })
   },
 
@@ -241,6 +242,7 @@ Page({
           wx.setStorageSync('dbUser', user)
           if ((user as any)._id) wx.setStorageSync('dbUserId', (user as any)._id)
           this.initializeUserPreferencesFromDb(user)
+          this.loadSysConfig()
         } else {
           wx.showToast({ title: '资料获取失败', icon: 'none' })
         }
@@ -286,6 +288,27 @@ Page({
     const defaultPreferences: UserPreferences = { genres: ['摇滚'], cities: [city], priceRange: [0, 500] }
     this.setData({ preferences: defaultPreferences })
     wx.setStorageSync('userPreferences', defaultPreferences)
+  },
+
+  loadSysConfig() {
+    const cached = wx.getStorageSync('sysConfig')
+    const now = Date.now()
+    if (cached && cached.expireTime && now < cached.expireTime) {
+      const data = cached.data || {}
+      if (Array.isArray(data.cities)) this.setData({ cities: data.cities })
+      if (Array.isArray(data.music_tags)) this.setData({ genres: data.music_tags })
+      return
+    }
+    wx.cloud.callFunction({ name: 'config', data: { type: 'getConfigs', types: ['cities', 'music_tags'] } })
+      .then((r: any) => {
+        if (r.result && r.result.code === 0) {
+          const data = r.result.data || {}
+          if (Array.isArray(data.cities)) this.setData({ cities: data.cities })
+          if (Array.isArray(data.music_tags)) this.setData({ genres: data.music_tags })
+          wx.setStorageSync('sysConfig', { data, expireTime: now + 24 * 60 * 60 * 1000 })
+        }
+      })
+      .catch(() => {})
   },
 
   

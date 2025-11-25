@@ -9,7 +9,9 @@ Page({
       signature: '',
       tags: [] as string[]
     },
-    allTags: ['摇滚','朋克','金属','独立','民谣摇滚','电子摇滚','后摇','布鲁斯']
+    allTags: [] as string[],
+    cities: [] as string[],
+    genders: [] as any[]
   },
 
   onLoad() {
@@ -30,6 +32,7 @@ Page({
           })
         }
       })
+    this.loadSysConfig()
   },
 
   onChooseAvatar(e: any) {
@@ -63,10 +66,17 @@ Page({
   onTagToggle(e: any) {
     const idx = Number(e.currentTarget.dataset.index)
     const tag = this.data.allTags[idx]
+    const tags = this.data.form.tags || []
+    const i = tags.indexOf(tag)
+    const next = i > -1 ? [...tags.slice(0, i), ...tags.slice(i + 1)] : [...tags, tag]
+    this.setData({ 'form.tags': next })
+  },
+
+  onCityPick(e: any) {
+    const index = Number(e.detail.value)
+    const city = this.data.cities[index]
     const form = this.data.form
-    const i = form.tags.indexOf(tag)
-    if (i > -1) form.tags.splice(i, 1)
-    else form.tags.push(tag)
+    form.city = city
     this.setData({ form })
   },
 
@@ -92,5 +102,28 @@ Page({
         wx.showToast({ title: '保存失败', icon: 'none' })
       }
     }).catch(() => wx.showToast({ title: '保存失败', icon: 'none' }))
+  },
+
+  loadSysConfig() {
+    const cached = wx.getStorageSync('sysConfig')
+    const now = Date.now()
+    if (cached && cached.expireTime && now < cached.expireTime) {
+      const data = cached.data || {}
+      if (Array.isArray(data.cities)) this.setData({ cities: data.cities })
+      if (Array.isArray(data.music_tags)) this.setData({ allTags: data.music_tags })
+      if (Array.isArray(data.genders)) this.setData({ genders: data.genders })
+      return
+    }
+    wx.cloud.callFunction({ name: 'config', data: { type: 'getConfigs', types: ['cities', 'music_tags', 'genders'] } })
+      .then((r: any) => {
+        if (r.result && r.result.code === 0) {
+          const data = r.result.data || {}
+          if (Array.isArray(data.cities)) this.setData({ cities: data.cities })
+          if (Array.isArray(data.music_tags)) this.setData({ allTags: data.music_tags })
+          if (Array.isArray(data.genders)) this.setData({ genders: data.genders })
+          wx.setStorageSync('sysConfig', { data, expireTime: now + 24 * 60 * 60 * 1000 })
+        }
+      })
+      .catch(() => {})
   }
 })
