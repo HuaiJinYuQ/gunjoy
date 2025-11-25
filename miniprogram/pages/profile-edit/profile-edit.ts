@@ -11,7 +11,8 @@ Page({
     },
     allTags: [] as string[],
     cities: [] as string[],
-    genders: [] as any[]
+    genders: [] as any[],
+    customTagInput: ''
   },
 
   onLoad() {
@@ -65,11 +66,38 @@ Page({
 
   onTagToggle(e: any) {
     const idx = Number(e.currentTarget.dataset.index)
-    const tag = this.data.allTags[idx]
+    const tag = e.currentTarget.dataset.tag || this.data.allTags[idx]
     const tags = this.data.form.tags || []
     const i = tags.indexOf(tag)
     const next = i > -1 ? [...tags.slice(0, i), ...tags.slice(i + 1)] : [...tags, tag]
     this.setData({ 'form.tags': next })
+  },
+
+  onTagRemove(e: any) {
+    const tag = e.currentTarget.dataset.tag
+    const tags = this.data.form.tags || []
+    const i = tags.indexOf(tag)
+    if (i > -1) {
+      const next = [...tags.slice(0, i), ...tags.slice(i + 1)]
+      this.setData({ 'form.tags': next })
+    }
+  },
+
+  onCustomTagInput(e: any) {
+    this.setData({ customTagInput: e.detail.value })
+  },
+
+  onCustomTagConfirm(e: any) {
+    const raw = (e.detail && e.detail.value) ? e.detail.value : this.data.customTagInput
+    const tag = String(raw || '').trim()
+    if (!tag) return
+    const tags = this.data.form.tags || []
+    if (tags.indexOf(tag) > -1) {
+      this.setData({ customTagInput: '' })
+      return
+    }
+    const next = [...tags, tag]
+    this.setData({ 'form.tags': next, customTagInput: '' })
   },
 
   onCityPick(e: any) {
