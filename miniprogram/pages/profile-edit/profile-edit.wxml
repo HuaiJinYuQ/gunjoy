@@ -3,7 +3,7 @@
     <view class="form-item avatar-item">
       <text class="label">头像</text>
       <view class="avatar-row">
-        <image class="avatar" src="{{form.avatarUrl || '../../images/head.png'}}"></image>
+        <image class="avatar avatar--md" mode="aspectFill" src="{{form.avatarUrl || '../../images/head.png'}}"></image>
         <button class="btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">更换</button>
       </view>
     </view>
@@ -50,7 +50,7 @@
       <view class="selected-row">
         <input class="input" value="{{form.tags.join('，')}}" placeholder="已选标签将显示在此" disabled />
         <view class="chips">
-          <view wx:for="{{form.tags}}" wx:key="*this" class="chip">
+          <view wx:for="{{form.tags}}" wx:key="*this" class="chip" bindlongpress="onChipLongPress" data-tag="{{item}}">
             <text>{{item}}</text>
             <text class="chip-remove" data-tag="{{item}}" bindtap="onTagRemove">×</text>
           </view>

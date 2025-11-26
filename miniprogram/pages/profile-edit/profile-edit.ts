@@ -100,6 +100,11 @@ Page({
     this.setData({ 'form.tags': next, customTagInput: '' })
   },
 
+  onChipLongPress(e: any) {
+    const tag = e.currentTarget.dataset.tag
+    if (tag) wx.showToast({ title: tag, icon: 'none' })
+  },
+
   onCityPick(e: any) {
     const index = Number(e.detail.value)
     const city = this.data.cities[index]

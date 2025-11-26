@@ -3,7 +3,6 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const db = cloud.database()
-let zodiacRangesCache = null
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
@@ -64,8 +63,7 @@ async function userGetProfile(event, wxContext) {
     }
     const user = userResult.data[0]
     const age = calcAge(user.birthday)
-    const zodiac = await getZodiacName(user.birthday)
-    return { code: 0, data: { ...user, age, zodiac }, message: '获取成功' }
+    return { code: 0, data: { ...user, age }, message: '获取成功' }
   } catch (error) {
     return { code: -1, message: error.message }
   }
@@ -86,10 +84,9 @@ async function userUpdateProfile(event, wxContext) {
     }
     const user = userResult.data[0]
     await db.collection('users').doc(user._id).update({ data: { ...fields, updatedAt: new Date() } })
-    const latest = await db.collection('users').doc(user._id).get()
-    const age = calcAge(latest.data.birthday)
-    const zodiac = await getZodiacName(latest.data.birthday)
-    return { code: 0, data: { ...latest.data, age, zodiac }, message: '更新成功' }
+  const latest = await db.collection('users').doc(user._id).get()
+  const age = calcAge(latest.data.birthday)
+  return { code: 0, data: { ...latest.data, age }, message: '更新成功' }
   } catch (error) {
     return { code: -1, message: error.message }
   }
@@ -106,8 +103,7 @@ async function userGetProfileById(event, wxContext) {
       return { code: -1, message: '用户不存在' }
     }
     const age = calcAge(latest.data.birthday)
-    const zodiac = calcZodiac(latest.data.birthday)
-    return { code: 0, data: { ...latest.data, age, zodiac }, message: '获取成功' }
+    return { code: 0, data: { ...latest.data, age }, message: '获取成功' }
   } catch (error) {
     return { code: -1, message: error.message }
   }
@@ -123,43 +119,4 @@ function calcAge(birthday) {
   return age
 }
 
-function calcZodiacFallback(birthday) {
-  if (!birthday) return null
-  const b = new Date(birthday)
-  const m = b.getMonth() + 1
-  const d = b.getDate()
-  const ranges = [
-    ['摩羯座', 12, 22, 1, 19], ['水瓶座', 1, 20, 2, 18], ['双鱼座', 2, 19, 3, 20],
-    ['牡羊座', 3, 21, 4, 19], ['金牛座', 4, 20, 5, 20], ['双子座', 5, 21, 6, 21],
-    ['巨蟹座', 6, 22, 7, 22], ['狮子座', 7, 23, 8, 22], ['处女座', 8, 23, 9, 22],
-    ['天秤座', 9, 23, 10, 23], ['天蝎座', 10, 24, 11, 22], ['射手座', 11, 23, 12, 21]
-  ]
-  for (const [name, sm, sd, em, ed] of ranges) {
-    if ((m === sm && d >= sd) || (m === em && d <= ed)) return name
-  }
-  return null
-}
 
-async function getZodiacName(birthday) {
-  if (!birthday) return null
-  if (!zodiacRangesCache) {
-    const r = await db.collection('sys_config').where({ type: 'zodiac_ranges' }).orderBy('updatedAt', 'desc').limit(1).get()
-    zodiacRangesCache = r.data.length ? r.data[0].data : null
-  }
-  if (Array.isArray(zodiacRangesCache) && zodiacRangesCache.length) {
-    const b = new Date(birthday)
-    const m = b.getMonth() + 1
-    const d = b.getDate()
-    for (const item of zodiacRangesCache) {
-      const sm = item.start && item.start.m
-      const sd = item.start && item.start.d
-      const em = item.end && item.end.m
-      const ed = item.end && item.end.d
-      if (sm && sd && em && ed) {
-        if ((m === sm && d >= sd) || (m === em && d <= ed)) return item.name
-      }
-    }
-    return null
-  }
-  return calcZodiacFallback(birthday)
-}

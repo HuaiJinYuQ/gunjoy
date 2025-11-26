@@ -20,7 +20,7 @@ exports.main = async (event, context) => {
 
 async function getConfigs(event) {
   try {
-    const types = Array.isArray(event.types) && event.types.length ? event.types : ['cities', 'genders', 'zodiac_ranges', 'music_tags']
+    const types = Array.isArray(event.types) && event.types.length ? event.types : ['cities', 'genders', 'music_tags']
     const out = {}
     const missing = []
     for (const t of types) {
@@ -78,20 +78,6 @@ async function initConfig(event) {
         { value: 0, label: '保密' },
         { value: 1, label: '男' },
         { value: 2, label: '女' }
-      ],
-      zodiac_ranges: [
-        { name: '摩羯座', start: { m: 12, d: 22 }, end: { m: 1, d: 19 } },
-        { name: '水瓶座', start: { m: 1, d: 20 }, end: { m: 2, d: 18 } },
-        { name: '双鱼座', start: { m: 2, d: 19 }, end: { m: 3, d: 20 } },
-        { name: '牡羊座', start: { m: 3, d: 21 }, end: { m: 4, d: 19 } },
-        { name: '金牛座', start: { m: 4, d: 20 }, end: { m: 5, d: 20 } },
-        { name: '双子座', start: { m: 5, d: 21 }, end: { m: 6, d: 21 } },
-        { name: '巨蟹座', start: { m: 6, d: 22 }, end: { m: 7, d: 22 } },
-        { name: '狮子座', start: { m: 7, d: 23 }, end: { m: 8, d: 22 } },
-        { name: '处女座', start: { m: 8, d: 23 }, end: { m: 9, d: 22 } },
-        { name: '天秤座', start: { m: 9, d: 23 }, end: { m: 10, d: 23 } },
-        { name: '天蝎座', start: { m: 10, d: 24 }, end: { m: 11, d: 22 } },
-        { name: '射手座', start: { m: 11, d: 23 }, end: { m: 12, d: 21 } }
       ],
       music_tags: [
         '摇滚','朋克','金属','独立','民谣摇滚','电子摇滚','后摇','硬核','新金属',

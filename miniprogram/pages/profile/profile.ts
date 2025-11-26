@@ -45,15 +45,19 @@ Page({
     } as UserPreferences,
     favoriteCount: 0,
     noteCount: 0,
-    zodiac: '',
-    genres: ['摇滚', '朋克', '金属', '独立', '民谣摇滚', '电子摇滚'],
+    
+    computedAge: null as number | null,
+    topTagsText: '' as string ,
+    genres: [] as string[],
+    availableTags: [] as string[],
     cities: ['北京', '上海', '广州', '深圳', '成都', '西安', '武汉', '杭州'],
     priceRanges: [
       { label: '0-100', value: [0, 100] },
       { label: '100-300', value: [100, 300] },
       { label: '300-500', value: [300, 500] },
       { label: '500+', value: [500, 2000] }
-    ]
+    ],
+    showAllTags: false
   },
 
   onLoad() {
@@ -64,6 +68,7 @@ Page({
       if (this.data.isLoggedIn) this.tryLoadProfileFromCloud()
       this.loadSysConfig()
     })
+    
   },
 
   //#region 用户登录与缓存
@@ -74,7 +79,9 @@ Page({
       if (loginInfo && loginInfo.expireTime && now < loginInfo.expireTime && (loginInfo.dbUser || loginInfo.userId)) {
         if (loginInfo.dbUser) {
           const dbUser = loginInfo.dbUser as DBUser
-          this.setData({ dbUser, isLoggedIn: true, hasUserInfo: true })
+          const computedAge = this.computeAgeFromBirthday(dbUser && dbUser.birthday)
+          const topTagsText = this.buildTopTagsText(dbUser && dbUser.tags)
+          this.setData({ dbUser, isLoggedIn: true, hasUserInfo: true, computedAge, topTagsText, genres: (dbUser && dbUser.tags) || [] })
           wx.setStorageSync('dbUser', dbUser)
           if ((dbUser as any)._id) wx.setStorageSync('dbUserId', (dbUser as any)._id)
           this.initializeUserPreferencesFromDb(dbUser)
@@ -84,7 +91,9 @@ Page({
             .then((r: any) => {
               if (r.result && r.result.code === 0) {
                 const user = r.result.data as DBUser
-                this.setData({ dbUser: user, isLoggedIn: true, hasUserInfo: true, zodiac: (user as any).zodiac || '' })
+                const computedAge = this.computeAgeFromBirthday(user && user.birthday)
+                const topTagsText = this.buildTopTagsText(user && user.tags)
+                this.setData({ dbUser: user, isLoggedIn: true, hasUserInfo: true, computedAge, topTagsText, genres: (user && user.tags) || [] })
                 wx.setStorageSync('dbUser', user)
                 if ((user as any)._id) wx.setStorageSync('dbUserId', (user as any)._id)
                 this.initializeUserPreferencesFromDb(user)
@@ -144,7 +153,7 @@ Page({
 
   onGenreChange(e: any) {
     const { index } = e.currentTarget.dataset;
-    const genre = this.data.genres[index];
+    const genre = this.data.availableTags[index];
     const preferences = this.data.preferences;
     
     const genreIndex = preferences.genres.indexOf(genre);
@@ -233,21 +242,19 @@ Page({
       .then((r: any) => {
         if (r.result && r.result.code === 0) {
           const user = r.result.data as DBUser
-          this.setData({
-            dbUser: user,
-            isLoggedIn: true,
-            hasUserInfo: true,
-            zodiac: (user as any).zodiac || ''
-          })
+          const computedAge = this.computeAgeFromBirthday(user && user.birthday)
+          const topTagsText = this.buildTopTagsText(user && user.tags)
+          this.setData({ dbUser: user, isLoggedIn: true, hasUserInfo: true, computedAge, topTagsText, genres: (user && user.tags) || [] })
           wx.setStorageSync('dbUser', user)
           if ((user as any)._id) wx.setStorageSync('dbUserId', (user as any)._id)
           this.initializeUserPreferencesFromDb(user)
           this.loadSysConfig()
         } else {
+          console.error('资料获取失败', r)
           wx.showToast({ title: '资料获取失败', icon: 'none' })
         }
       })
-      .catch(() => { wx.showToast({ title: '资料获取失败', icon: 'none' }) })
+      .catch((e: any) => { console.error('资料获取失败', e); wx.showToast({ title: '资料获取失败', icon: 'none' }) })
   },
 
 
@@ -296,7 +303,7 @@ Page({
     if (cached && cached.expireTime && now < cached.expireTime) {
       const data = cached.data || {}
       if (Array.isArray(data.cities)) this.setData({ cities: data.cities })
-      if (Array.isArray(data.music_tags)) this.setData({ genres: data.music_tags })
+      if (Array.isArray(data.music_tags)) this.setData({ availableTags: data.music_tags })
       return
     }
     wx.cloud.callFunction({ name: 'config', data: { type: 'getConfigs', types: ['cities', 'music_tags'] } })
@@ -304,11 +311,66 @@ Page({
         if (r.result && r.result.code === 0) {
           const data = r.result.data || {}
           if (Array.isArray(data.cities)) this.setData({ cities: data.cities })
-          if (Array.isArray(data.music_tags)) this.setData({ genres: data.music_tags })
+          if (Array.isArray(data.music_tags)) this.setData({ availableTags: data.music_tags })
           wx.setStorageSync('sysConfig', { data, expireTime: now + 24 * 60 * 60 * 1000 })
         }
       })
       .catch(() => {})
+  },
+
+  onShow() {
+    const dbUser = wx.getStorageSync('dbUser') as DBUser
+    if (dbUser) {
+      const computedAge = this.computeAgeFromBirthday(dbUser && dbUser.birthday)
+      const topTagsText = this.buildTopTagsText(dbUser && dbUser.tags)
+      this.setData({ dbUser, computedAge, topTagsText, genres: (dbUser && dbUser.tags) || [] })
+    } else if (this.data.isLoggedIn) {
+      this.tryLoadProfileFromCloud()
+    }
+  },
+
+  computeAgeFromBirthday(birthday?: string | null): number | null {
+    if (!birthday) return null
+    const m = /^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})$/.exec(birthday)
+    if (!m) return null
+    const y = Number(m[1]); const mon = Number(m[2]); const d = Number(m[3])
+    const now = new Date()
+    let age = now.getFullYear() - y
+    const mNow = now.getMonth() + 1
+    const dNow = now.getDate()
+    if (mNow < mon || (mNow === mon && dNow < d)) age -= 1
+    return age >= 0 ? age : null
+  },
+
+  buildTopTagsText(tags?: string[] | null): string {
+    if (!Array.isArray(tags) || !tags.length) return ''
+    const top3 = tags.slice(0, 3)
+    return top3.join('、')
+  },
+
+  
+
+  onTagLongPress(e: any) {
+    const tag = e.currentTarget.dataset.tag
+    if (tag) wx.showToast({ title: tag, icon: 'none' })
+  },
+
+  onTagsContainerLongPress() {
+    const tags = this.data.genres || []
+    if (!tags.length) {
+      wx.showToast({ title: '标签未设置', icon: 'none' })
+      return
+    }
+    if (tags.length <= 6) {
+      wx.showActionSheet({ itemList: tags })
+    } else {
+      wx.showModal({ title: '全部标签', content: tags.join('、'), showCancel: false })
+    }
+  },
+
+  toggleTagsExpanded() {
+    const v = !this.data.showAllTags
+    this.setData({ showAllTags: v })
   },
 
   
@@ -345,38 +407,6 @@ Page({
       title: '功能开发中',
       icon: 'none'
     });
-  },
-
-  onConcertOrders() {
-    wx.showToast({ title: '演出订单开发中', icon: 'none' })
-  },
-
-  onCrowdOrders() {
-    wx.showToast({ title: '众筹订单开发中', icon: 'none' })
-  },
-
-  onMerchOrders() {
-    wx.showToast({ title: '周边订单开发中', icon: 'none' })
-  },
-
-  onAddress() {
-    wx.showToast({ title: '收货地址开发中', icon: 'none' })
-  },
-
-  onAudience() {
-    wx.showToast({ title: '常用观演人开发中', icon: 'none' })
-  },
-
-  onCoupons() {
-    wx.showToast({ title: '优惠券开发中', icon: 'none' })
-  },
-
-  onHelpCenter() {
-    wx.showToast({ title: '帮助中心开发中', icon: 'none' })
-  },
-
-  onCustomerService() {
-    wx.showToast({ title: '客服电话开发中', icon: 'none' })
   },
 
   onAbout() {

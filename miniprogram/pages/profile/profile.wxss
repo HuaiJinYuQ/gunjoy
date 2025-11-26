@@ -8,8 +8,6 @@
 .container,
 .page-header,
 .top-section,
-.grid-section,
-.menu-section,
 .about-section,
 .profile-card {
   width: 100%;
@@ -30,18 +28,20 @@
   align-items: center;
 }
 
-.avatar {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 50%;
-  border: 4rpx solid rgba(255, 255, 255, 0.3);
-  margin-bottom: 20rpx;
-}
+.avatar { border-radius: 50%; display: block; background-color: #f0f0f0; }
+.avatar--sm { width: 120rpx; height: 120rpx; }
+.avatar--md { width: 160rpx; height: 160rpx; }
+.avatar--lg { width: 200rpx; height: 200rpx; }
 
 .nickname {
   font-size: 32rpx;
   font-weight: 500;
   margin-bottom: 30rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  max-width: 100%;
 }
 
 .user-stats {
@@ -174,45 +174,11 @@
   border-color: #FF6B35;
 }
 
-/* 菜单区域 */
-.menu-section {
-  background-color: white;
-  margin: 0;
-  border-radius: 0;
-  overflow: hidden;
-}
 
-.menu-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 32rpx;
-  border-bottom: 1rpx solid #f5f5f5;
-}
-
-.menu-item:last-child {
-  border-bottom: none;
-}
-
-.menu-text {
-  font-size: 30rpx;
-  color: #333;
-}
-
-.logout-text {
-  color: #ff4444;
-}
-
-.arrow-icon {
-  width: 24rpx;
-  height: 24rpx;
-  opacity: 0.4;
-  transform: rotate(-90deg);
-}
 .top-section { padding: 0; margin-bottom: 16rpx; }
 .login-tip { background-color: #fff; border-radius: 16rpx; padding: 24rpx; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
 .profile-card { background-color: #fff; border-radius: 16rpx; padding: 24rpx; display: flex; align-items: center; }
-.profile-card .avatar { border: none; margin-bottom: 0; margin-right: 20rpx; }
+.profile-card .avatar { border: none; margin-bottom: 0; margin-right: 20rpx; flex: 0 0 auto; }
 .profile-card .nickname { font-weight: 600; margin-bottom: 0; }
 .profile-meta { flex: 1; }
 .meta-row { display: flex; align-items: center; gap: 12rpx; color: #666; margin-top: 8rpx; }
@@ -220,10 +186,11 @@
 .meta-sep { color: #ccc; }
 .edit-arrow { font-size: 40rpx; color: #ccc; }
 
-.grid-section { margin: 0; background-color: #fff; border-radius: 0; padding: 16rpx; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16rpx; }
-.grid-item { background-color: #fafafa; border-radius: 12rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36rpx 0; }
-.grid-icon { font-size: 40rpx; color: #333; margin-bottom: 12rpx; }
-.grid-text { font-size: 28rpx; color: #333; }
+.tags-fixed { flex: 1; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tag-chip { display: inline-flex; vertical-align: middle; background-color: #fafafa; border: 1rpx solid #eee; border-radius: 20rpx; padding: 6rpx 12rpx; margin-right: 12rpx; }
+.chip-text { font-size: 26rpx; color: #333; }
+.tags-expanded { margin-top: 8rpx; display: flex; flex-wrap: wrap; gap: 12rpx; }
+.meta-action { font-size: 24rpx; color: #999; }
 
 .about-section { margin: 0; background-color: #fff; border-radius: 0; padding: 24rpx; text-align: center; color: #666; }
 .about-title { font-size: 28rpx; color: #333; display: block; margin-bottom: 8rpx; }

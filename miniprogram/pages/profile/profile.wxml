@@ -5,61 +5,36 @@
   <view class="top-section" style="padding-top: {{statusBarHeight}}px">
 
     <view class="profile-card" bindtap="goToProfileEdit" style="min-height: {{navContentHeight}}px">
-      <image class="avatar" src="{{(dbUser && (dbUser.avatarUrl || dbUser.avatar)) || (userInfo && userInfo.avatarUrl) || '../../images/head.png'}}"></image>
+      <image class="avatar avatar--md" mode="aspectFill" src="{{(dbUser && (dbUser.avatarUrl || dbUser.avatar)) || (userInfo && userInfo.avatarUrl) || '../../images/head.png'}}"></image>
       <view class="profile-meta">
         <text class="nickname">{{(dbUser && dbUser.nickname) || (userInfo && userInfo.nickName) || '未登录'}}</text>
         <view class="meta-row" wx:if="{{isLoggedIn}}">
-          <text class="meta-item">{{dbUser && dbUser.age ? dbUser.age + '岁' : '年龄未设置'}}</text>
+          <text class="meta-item">{{computedAge ? computedAge + '岁' : '年龄未设置'}}</text>
           <text class="meta-sep">·</text>
-          <text class="meta-item">{{zodiac || '星座未设置'}}</text>
+          <view class="tags-fixed" bindlongpress="onTagsContainerLongPress">
+            <view wx:for="{{genres}}" wx:key="*this" class="tag-chip" bindlongpress="onTagLongPress" data-tag="{{item}}">
+              <text class="chip-text">{{item}}</text>
+            </view>
+            <text wx:if="{{!genres.length}}" class="meta-item">标签未设置</text>
+          </view>
+          <text wx:if="{{genres.length}}" class="meta-action" bindtap="toggleTagsExpanded">{{showAllTags ? '收起' : '展开'}}</text>
           <text class="meta-sep">·</text>
           <text class="meta-item">{{(dbUser && dbUser.province) || ''}} {{(dbUser && dbUser.city) || ''}}</text>
+        </view>
+        <view wx:if="{{showAllTags}}" class="tags-expanded">
+          <view wx:for="{{genres}}" wx:key="*this" class="tag-chip">
+            <text class="chip-text">{{item}}</text>
+          </view>
         </view>
       </view>
       <text class="edit-arrow">›</text>
     </view>
   </view>
 
-  <!-- 中部网格功能 -->
-  <view class="grid-section" style="width: 100%">
-    <view class="grid-item" bindtap="onConcertOrders">
-      <text class="grid-icon">📋</text>
-      <text class="grid-text">演出订单</text>
-    </view>
-    <view class="grid-item" bindtap="onCrowdOrders">
-      <text class="grid-icon">🌱</text>
-      <text class="grid-text">众筹订单</text>
-    </view>
-    <view class="grid-item" bindtap="onMerchOrders">
-      <text class="grid-icon">🛍️</text>
-      <text class="grid-text">周边订单</text>
-    </view>
-  </view>
+
 
   
-  <!-- 功能菜单 -->
-  <view class="menu-section">
-    <view class="menu-item" bindtap="onAddress">
-      <text class="menu-text">收货地址</text>
-      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
-    </view>
-    <view class="menu-item" bindtap="onAudience">
-      <text class="menu-text">常用观演人</text>
-      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
-    </view>
-    <view class="menu-item" bindtap="onCoupons">
-      <text class="menu-text">优惠券</text>
-      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
-    </view>
-    <view class="menu-item" bindtap="onHelpCenter">
-      <text class="menu-text">帮助中心</text>
-      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
-    </view>
-    <view class="menu-item" bindtap="onCustomerService">
-      <text class="menu-text">客服电话</text>
-      <image src="../../icons/s-arrow-g.svg" class="arrow-icon"></image>
-    </view>
-  </view>
+
 
   <!-- 底部登录弹窗 -->
   <view class="login-bottom-sheet" wx:if="{{!isLoggedIn}}">

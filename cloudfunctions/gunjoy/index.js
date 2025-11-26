@@ -186,10 +186,9 @@ async function userGetProfile(event, wxContext) {
 
     const user = userResult.data[0]
     const age = calcAge(user.birthday)
-    const zodiac = calcZodiac(user.birthday)
     return {
       code: 0,
-      data: { ...user, age, zodiac },
+      data: { ...user, age },
       message: '获取成功'
     }
   } catch (error) {
@@ -243,22 +242,6 @@ function calcAge(birthday) {
   }
 }
 
-function calcZodiac(birthday) {
-  if (!birthday) return null
-  const b = new Date(birthday)
-  const m = b.getMonth() + 1
-  const d = b.getDate()
-  const ranges = [
-    ['摩羯座', 12, 22, 1, 19], ['水瓶座', 1, 20, 2, 18], ['双鱼座', 2, 19, 3, 20],
-    ['牡羊座', 3, 21, 4, 19], ['金牛座', 4, 20, 5, 20], ['双子座', 5, 21, 6, 21],
-    ['巨蟹座', 6, 22, 7, 22], ['狮子座', 7, 23, 8, 22], ['处女座', 8, 23, 9, 22],
-    ['天秤座', 9, 23, 10, 23], ['天蝎座', 10, 24, 11, 22], ['射手座', 11, 23, 12, 21]
-  ]
-  for (const [name, sm, sd, em, ed] of ranges) {
-    if ((m === sm && d >= sd) || (m === em && d <= ed)) return name
-  }
-  return null
-}
 
 // 发布评论
 async function publishComment(event, wxContext) {
