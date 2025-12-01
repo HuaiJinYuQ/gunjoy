@@ -179,7 +179,7 @@ Page({
   onConcertTap(e: any) {
     const { id } = e.currentTarget.dataset;
     wx.navigateTo({
-      url: `/pages/concert-detail/concert-detail?id=${id}`
+      url: `/pages/detail/detail?id=${id}`
     });
   },
 

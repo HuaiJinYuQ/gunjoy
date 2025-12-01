@@ -1,0 +1,57 @@
+<view class="container" wx:if="{{!loading && !hasError}}">
+  <view class="poster">
+    <image src="{{show.poster}}" class="poster-img" mode="aspectFill"></image>
+  </view>
+
+  <view class="card">
+    <view class="title-row">
+      <text class="title">{{show.title}}</text>
+      <button class="collect-btn" bindtap="onToggleCollection">{{isCollected ? '已收藏' : '收藏'}}</button>
+    </view>
+    <view class="info-item">
+      <text class="label">时间</text>
+      <text class="value">{{formatDate(show.showDate)}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">城市</text>
+      <text class="value">{{show.city}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">场地</text>
+      <text class="value">{{show.venue}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">类型</text>
+      <text class="tag">{{show.category}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">票价</text>
+      <text class="price">{{show.priceRange || '价格待定'}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="source-row">
+      <text class="source">来源：{{show.sourcePlatform || '未知'}}</text>
+      <button class="buy-btn" bindtap="onBuy">立即购票</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">演出介绍</view>
+    <view class="desc">{{show.description || '暂无介绍'}}</view>
+  </view>
+
+  <view class="action-bar">
+    <button class="primary" bindtap="onBuy">购票</button>
+    <button class="secondary" bindtap="onOpenMap">导航</button>
+  </view>
+</view>
+
+<view class="error" wx:if="{{hasError}}">
+  <text>{{errorMessage}}</text>
+</view>
+
+<view class="loading" wx:if="{{loading}}">
+  <text>加载中...</text>
+</view>

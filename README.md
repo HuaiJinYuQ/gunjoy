@@ -1,297 +1,227 @@
-# 滚聚（GunJoy）微信小程序技术实现方案
+# 滚聚（GunJoy） - 微信小程序
 
 > 声明：本应用正在开发中，当前仅作为本人学习使用；不用于商用发布。
 > 联系方式（微信）：`HuaiJinYuQ`
 
+基于微信云开发的演出活动数据聚合平台，帮助用户发现和浏览各大平台的演出信息。
 
-## 一、项目架构设计
+## 功能特性
 
-### 1.1 技术栈选择
-- 前端框架：微信小程序原生框架 + TypeScript
-- 状态管理：小程序原生能力 + 自定义全局状态管理
-- UI框架：微信原生组件 + 自定义组件库
-- 后端服务：云开发（CloudBase）+ Express.js API 服务
-- 数据库：云开发数据库 + Redis 缓存
-- 文件存储：云开发存储 + CDN 加速
+- 🎭 **演出浏览**: 展示各大平台的演出信息
+- 🔍 **智能搜索**: 支持关键词搜索和高级筛选
+- 📱 **分类导航**: 按演出类型快速筛选
+- ❤️ **收藏功能**: 收藏感兴趣的演出
+- 🏠 **个人中心**: 管理个人信息和收藏列表
+- 🔄 **数据同步**: 定时同步各大平台演出数据
 
-### 1.2 架构分层
+## 技术架构
+
+- **前端**: 微信小程序原生框架
+- **后端**: 微信云开发（CloudBase）
+- **数据库**: 云开发数据库
+- **存储**: 云开发云存储
+- **函数计算**: 云开发云函数
+
+## 快速开始
+
+### 1. 环境准备
+
+- 微信开发者工具
+- 微信小程序账号
+- 开通微信云开发
+
+### 2. 项目配置
+
+1. 克隆项目到本地
+2. 使用微信开发者工具打开项目
+3. 修改 `cloud.config.json` 中的环境ID
+4. 修改 `app.js` 中的云开发环境ID
+
+### 3. 云开发配置
+
+#### 创建数据库集合
+
+在微信开发者工具的云开发控制台中创建以下集合：
+
+- `shows` - 演出数据
+- `users` - 用户数据
+- `collections` - 用户收藏
+- `search_history` - 搜索历史
+- `system_logs` - 系统日志
+
+#### 设置数据库权限
+
+为每个集合设置相应的权限规则（参考 `database-init.js`）：
+
+- `shows`: 公开可读，管理员可写
+- `users`: 仅本人可读写
+- `collections`: 仅本人可读写
+- `search_history`: 仅本人可读写
+- `system_logs`: 仅管理员可读写
+
+#### 创建云函数
+
+在微信开发者工具中创建以下云函数：
+
+- `login` - 用户登录
+- `getShowList` - 获取演出列表
+- `getShowDetail` - 获取演出详情
+- `toggleCollection` - 收藏操作
+- `syncShowData` - 同步演出数据
+
+### 4. 部署云函数
+
+在微信开发者工具中右键点击云函数目录，选择"上传并部署：云端安装依赖"。
+
+### 5. 数据初始化
+
+1. 手动添加一些测试数据到 `shows` 集合
+2. 或者运行 `syncShowData` 云函数同步模拟数据
+
+## 项目结构
+
 ```
-滚聚小程序
-├── 表现层 (WXML + WXSS)
-├── 业务逻辑层 (JS + TS)
-├── 数据访问层 (API 封装)
-├── 云服务层 (云开发 + API 服务)
-└── 第三方服务层 (音频识别、LBS 等)
-```
-
-## 二、开发阶段划分与功能优先级
-
-### 2.1 MVP 阶段（第 1-2 个月）
-目标：验证产品价值，建立基础用户群
-
-- 演出信息聚合展示
-  - 演出列表（筛选：时间、城市、价格）
-  - 演出详情（基础信息展示）
-  - 收藏功能
-- 用户系统
-  - 微信授权登录
-  - 用户偏好录入（风格、城市、价格区间）
-  - 个人主页（基础展示）
-- 基础社群功能
-  - 演出评论区
-  - 演出群聊
-    - 不同分组群聊
-    - 拉进微信群
-  - 用户关注
-
-### 2.2 迭代阶段 1（第 3-4 个月）
-目标：增强粘性，完善核心功能
-
-- 精准推送系统
-  - 基于偏好的个性化推荐
-  - 消息通知
-- 现场体验增强
-  - 演出笔记
-  - 文本弹幕（低延迟）
-- 社群深化
-  - 二手交易（基础版）
-  - 摇滚知识库（基础版）
-
-### 2.3 迭代阶段 2（第 5-6 个月）
-目标：差异化功能，建立壁垒
-
-- 高级现场功能
-  - 曲目识别
-  - 语音弹幕
-  - 现场点歌
-- 勋章体系
-  - 等级系统
-  - 成就徽章
-- 商业化探索
-  - 授权内容分享
-  - 线下联动福利
-
-## 三、后端数据模型设计
-
-### 3.1 核心数据表结构（示例 TypeScript 定义）
-```typescript
-// 演出信息表
-interface Concert {
-  _id: string;
-  title: string;
-  description: string;
-  date: Date;
-  venue: string;
-  city: string;
-  price: number;
-  bands: string[];
-  genres: string[];
-  poster: string;
-  status: 'upcoming' | 'ongoing' | 'finished';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// 用户表
-interface User {
-  _id: string;
-  openid: string;
-  nickname: string;
-  avatar: string;
-  preferences: {
-    genres: string[];
-    cities: string[];
-    priceRange: [number, number];
-  };
-  level: number;
-  badges: string[];
-  createdAt: Date;
-}
-
-// 演出笔记表
-interface ConcertNote {
-  _id: string;
-  userId: string;
-  concertId: string;
-  content: string;
-  images: string[];
-  audio: string;
-  createdAt: Date;
-}
-
-// 弹幕表
-interface BulletComment {
-  _id: string;
-  concertId: string;
-  userId: string;
-  content: string;
-  type: 'text' | 'voice';
-  position: {
-    lat: number;
-    lng: number;
-  };
-  timestamp: Date;
-  createdAt: Date;
-}
+/Users/zhangkai/project/wechat_projects/gunjoy/
+├── cloudfunctions/          # 云函数
+│   ├── login/              # 用户登录
+│   ├── getShowList/        # 获取演出列表
+│   ├── getShowDetail/      # 获取演出详情
+│   ├── toggleCollection/   # 收藏操作
+│   └── syncShowData/       # 数据同步
+├── miniprogram/            # 小程序前端
+│   ├── pages/              # 页面文件
+│   │   ├── index/          # 首页
+│   │   ├── detail/         # 演出详情
+│   │   ├── profile/        # 个人中心
+│   │   ├── search/         # 搜索页面
+│   │   ├── filter/         # 筛选页面
+│   │   └── collection/     # 收藏列表
+│   ├── utils/              # 工具函数
+│   └── images/             # 图片资源
+├── app.js                  # 应用入口
+├── app.json                # 应用配置
+├── app.wxss                # 全局样式
+└── project.config.json     # 项目配置
 ```
 
-### 3.2 API 接口设计（示例）
-```http
-# 演出相关 API
-GET /api/concerts?page=1&limit=20&city=北京&genre=摇滚
-GET /api/concerts/:id
-POST /api/concerts/:id/favorite
-GET /api/concerts/recommendations
+## 开发指南
 
-# 用户相关 API
-POST /api/auth/login
-GET /api/users/profile
-PUT /api/users/preferences
-GET /api/users/:id/notes
+### 页面开发
 
-# 社群相关 API
-POST /api/concerts/:id/comments
-GET /api/concerts/:id/comments
-POST /api/comments/:id/like
+每个页面包含以下文件：
+- `.js` - 页面逻辑
+- `.wxml` - 页面结构
+- `.wxss` - 页面样式
+- `.json` - 页面配置
 
-# 现场功能 API
-POST /api/concerts/:id/notes
-POST /api/concerts/:id/bullet-comments
-GET /api/concerts/:id/bullet-comments
-```
+### 云函数开发
 
-## 四、核心技术难点解决方案
+云函数使用 Node.js 开发，每个云函数包含：
+- `index.js` - 函数入口
+- `package.json` - 依赖配置
+- `config.json` - 权限配置
 
-### 4.1 曲目识别技术方案
-挑战：摇滚识别准确率与实时性、版权合规
+### 数据模型
 
-解决方案（ACRCloud + 自研优化）：
-```typescript
-class MusicRecognitionService {
-  private acrCloudClient: ACRCloudClient;
-  private localCache: Map<string, RecognitionResult>;
-
-  async recognizeAudio(audioBuffer: ArrayBuffer): Promise<RecognitionResult> {
-    const processedAudio = await this.preprocessAudio(audioBuffer);
-    const result = await this.acrCloudClient.identify(processedAudio);
-    if (this.isRockMusic(result)) {
-      this.cacheResult(result);
-      return result;
-    }
-    return null;
-  }
-}
-```
-优化策略：
-- 建立摇滚专属曲库，提高识别准确率
-- 本地缓存热门歌曲，减少 API 调用
-- 音频指纹技术，降低网络传输量
-
-### 4.2 LBS 弹幕技术方案
-挑战：低延迟、位置精度、性能优化
-
-解决方案（WebSocket + Redis + 地理索引）：
-```typescript
-class BulletCommentService {
-  private redisClient: RedisClient;
-  private geoIndex: GeoIndex;
-
-  async getNearbyComments(lat: number, lng: number, radius: number) {
-    const nearbyComments = await this.redisClient.georadius(
-      'bullet_comments',
-      lng, lat, radius, 'm'
-    );
-    const recentComments = nearbyComments.filter(comment => 
-      Date.now() - comment.timestamp < 5 * 60 * 1000
-    );
-    return recentComments;
-  }
-}
-```
-性能优化：
-- 使用 Redis 集群处理高并发
-- 弹幕分级存储（热数据入内存，冷数据入库）
-- 客户端本地缓存与预加载
-
-### 4.3 实名认证交易方案
-挑战：合规、安全、体验
-
-解决方案（微信认证 + 合规审查 + 支付分账）：
-```typescript
-class TransactionService {
-  private wechatAuth: WechatAuthService;
-  private complianceService: ComplianceService;
-
-  async initiateTransaction(transaction: Transaction) {
-    const authStatus = await this.wechatAuth.getAuthStatus(transaction.userId);
-    if (!authStatus.verified) {
-      throw new Error('请先完成实名认证');
-    }
-    const complianceCheck = await this.complianceService.checkTransaction(transaction);
-    if (!complianceCheck.passed) {
-      throw new Error(complianceCheck.reason);
-    }
-    return await this.createWechatPayment(transaction);
-  }
+#### 演出数据 (shows)
+```javascript
+{
+  _id: string,
+  title: string,          // 演出标题
+  description: string,    // 演出描述
+  poster: string,         // 海报URL
+  showDate: Date,         // 演出时间
+  venue: string,          // 演出场馆
+  city: string,           // 城市
+  category: string,       // 演出类型
+  priceRange: string,     // 价格范围
+  bookingUrl: string,     // 购票链接
+  sourcePlatform: string, // 数据来源平台
+  sourceId: string,       // 源平台ID
+  createdAt: Date,        // 创建时间
+  updatedAt: Date         // 更新时间
 }
 ```
 
-## 五、第三方服务推荐与集成方案
+#### 用户数据 (users)
+```javascript
+{
+  _id: string,
+  openid: string,         // 微信openid
+  nickname: string,       // 昵称
+  avatarUrl: string,      // 头像URL
+  createdAt: Date,        // 创建时间
+  lastLoginAt: Date       // 最后登录时间
+}
+```
 
-### 5.1 音频识别服务
-- ACRCloud：识别准确率高，支持中文歌曲，价格合理（推荐）
-- Shazam：知名度高，曲库丰富，API 限制较多
-- 百度音乐识别：中文识别较好，摇滚曲库一般
+#### 收藏数据 (collections)
+```javascript
+{
+  _id: string,
+  userId: string,         // 用户ID
+  showId: string,         // 演出ID
+  createdAt: Date         // 收藏时间
+}
+```
 
-推荐：ACRCloud + 自建摇滚曲库
-- 费用：约 500-1000 元/月（1 万次识别）
-- 集成难度：中等
-- 识别准确率：95%+
+## API 接口
 
-### 5.2 地图 LBS 服务
-- 腾讯地图：原生支持，API 稳定（推荐）
-- 高德地图：功能丰富，需额外集成
-- 百度地图：街景强，小程序支持一般
+### 获取演出列表
+```
+GET /getShowList
+参数:
+- page: 页码
+- pageSize: 每页数量
+- keyword: 搜索关键词
+- category: 演出类型
+- city: 城市
+- dateRange: 日期范围
+- priceRange: 价格范围
+```
 
-推荐：腾讯地图 + 自研地理索引
-- 免费额度足够初期使用
-- 实时性 < 100ms；精度 10 米内
+### 获取演出详情
+```
+GET /getShowDetail
+参数:
+- id: 演出ID
+```
 
-### 5.3 实时通信服务
-- 腾讯云 IM：原生支持、稳定（推荐）
-- 环信：功能丰富
-- 网易云信：实时性好，小程序支持一般
+### 收藏操作
+```
+POST /toggleCollection
+参数:
+- showId: 演出ID
+- action: collect/cancel
+```
 
-推荐：腾讯云 IM + 自研 WebSocket
-- 费用：约 1000-2000 元/月（10 万 DAU）
-- 延迟 < 50ms；并发 10 万+
+## 部署上线
 
-### 5.4 内容审核服务
-- 腾讯云内容审核：准确率高，支持音频/文本/图片（推荐）
-- 百度内容审核：价格便宜
-- 阿里云内容安全：功能全面
+1. 在微信开发者工具中点击"上传"
+2. 在小程序管理后台提交审核
+3. 审核通过后发布上线
 
-推荐：腾讯云内容审核
-- 费用：约 500-1000 元/月
-- 审核准确率 98%+；响应 < 200ms
+## 注意事项
 
-## 六、开发实施建议
+1. 确保云开发环境已开通
+2. 数据库权限设置正确
+3. 云函数已部署到云端
+4. 图片资源已上传到云存储
+5. API密钥等敏感信息不要提交到代码仓库
 
-### 6.1 技术选型总结
-- 前端：微信小程序原生 + TypeScript，保障性能与兼容
-- 后端：云开发 + Express.js，兼顾迭代效率与性能
-- 数据库：云开发数据库 + Redis，满足实时需求
-- 第三方：ACRCloud + 腾讯云，保障服务质量
+## 后续优化
 
-### 6.2 开发注意事项
-- 性能优化：分包加载、图片懒加载、数据缓存
-- 用户体验：骨架屏、加载与错误状态、操作反馈
-- 合规性：内容审核、实名认证、版权保护
-- 监控：性能监控、错误上报、用户行为分析
+- [ ] 添加更多数据源平台
+- [ ] 实现智能推荐算法
+- [ ] 添加演出提醒功能
+- [ ] 优化搜索体验
+- [ ] 添加用户评论功能
+- [ ] 实现演出日历视图
 
-### 6.3 预估成本
-- 开发：3-4 个月，2-3 人团队
-- 运营：月 5000-10000 元（含第三方服务）
-- 推广：视策略而定
+## 联系方式
 
-如需细化到页面路由结构、组件拆分方案或接口字段定义，我可以继续补充并给出代码模板与目录结构建议。
+如有问题或建议，请提交 Issue 或联系开发团队。
+
+---
+
+© 2024 演出活动数据聚合平台

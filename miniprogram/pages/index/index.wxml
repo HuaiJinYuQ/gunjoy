@@ -1,69 +1,110 @@
 <!--index.wxml-->
-<scroll-view class="scrollarea" scroll-y type="list" bindscrolltolower="onReachBottom">
-  <view class="container">
+<view class="home-container">
+  <!-- 顶部搜索栏 -->
+  <view class="search-header">
+    <view class="search-bar" bindtap="goToSearch">
+      <text class="search-placeholder">搜索演出、艺人、场馆</text>
+      <image class="search-icon" src="/images/search-icon.png"></image>
+    </view>
+    <view class="filter-btn" bindtap="goToFilter">
+      <image class="filter-icon" src="/images/filter-icon.png"></image>
+    </view>
+  </view>
 
-    
-
-    <!-- 推荐演出 -->
-    <view class="recommended-section">
-      <view class="section-header">
-        <text class="section-title">热门演出</text>
-        <text class="section-more" bindtap="goToConcerts">查看更多</text>
-      </view>
-      
-      <view class="concert-list">
-        <view wx:for="{{recommendedConcerts}}" wx:key="_id" class="concert-item" bindtap="goToConcertDetail" data-id="{{item._id}}">
-          <image src="{{item.poster}}" class="concert-poster" mode="aspectFill"></image>
-          <view class="concert-info">
-            <text class="concert-title">{{item.title}}</text>
-            <text class="concert-date">{{item.dateFormatted}}</text>
-            <text class="concert-venue">{{item.venue}}</text>
+  <!-- 轮播图 -->
+  <view class="carousel-section" wx:if="{{bannerShows.length > 0}}">
+    <swiper class="carousel" indicator-dots="{{true}}" autoplay="{{true}}" interval="{{3000}}" duration="{{500}}">
+      <swiper-item wx:for="{{bannerShows}}" wx:key="id">
+        <view class="carousel-item" bindtap="onBannerTap" data-item="{{item}}">
+          <image class="carousel-image" src="{{item.poster}}" mode="aspectFill"></image>
+          <view class="carousel-info">
+            <text class="carousel-title">{{item.title}}</text>
+            <text class="carousel-date">{{item.showDateStr}}</text>
           </view>
         </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 分类导航 -->
+  <view class="category-nav">
+    <view class="category-item" wx:for="{{categories}}" wx:key="type" bindtap="onCategoryTap" data-category="{{item.type}}">
+      <view class="category-icon" style="background-color: {{item.color}}">
+        <text class="category-emoji">{{item.emoji}}</text>
+      </view>
+      <text class="category-name">{{item.name}}</text>
+    </view>
+  </view>
+
+  <!-- 演出列表 -->
+  <view class="show-list-section">
+    <view class="section-header">
+      <text class="section-title">全部演出</text>
+      <view class="sort-options">
+        <picker bindchange="onSortChange" value="{{sortIndex}}" range="{{sortOptions}}" range-key="name">
+          <view class="sort-picker">
+            <text class="sort-text">{{sortOptions[sortIndex].name}}</text>
+            <image class="sort-arrow" src="/images/arrow-down.png"></image>
+          </view>
+        </picker>
       </view>
     </view>
 
-    <!-- 社区热帖 -->
-    <view class="feed-section">
-      <view class="section-header">
-        <text class="section-title">社区热帖</text>
-      </view>
-      <view class="feed-list">
-        <view wx:for="{{posts}}" wx:key="_id" class="post-card" bindtap="onPostTap" data-id="{{item._id}}">
-          <view class="post-header">
-            <image class="avatar" src="{{item.userAvatar}}"></image>
-            <view class="meta">
-              <text class="name">{{item.userName}}</text>
-              <text class="time">{{item.timeFormatted}}</text>
+    <!-- 加载状态 -->
+    <view class="loading-container" wx:if="{{isLoading && shows.length === 0}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在加载演出信息...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!isLoading && shows.length === 0}}">
+      <image class="empty-icon" src="/images/empty-shows.png"></image>
+      <text class="empty-text">暂无演出信息</text>
+      <text class="empty-subtext">请稍后再试或刷新页面</text>
+    </view>
+
+    <!-- 演出卡片列表 -->
+    <view class="show-list" wx:if="{{shows.length > 0}}">
+      <view class="show-card" wx:for="{{shows}}" wx:key="id" bindtap="onShowTap" data-id="{{item.id}}">
+        <image class="show-poster" src="{{item.poster}}" mode="aspectFill"></image>
+        <view class="show-info">
+          <view class="show-header">
+            <text class="show-title">{{item.title}}</text>
+            <view class="show-category" style="background-color: {{getCategoryColor(item.category)}}">
+              <text class="category-text">{{item.category}}</text>
             </view>
           </view>
-          <view class="post-content">
-            <text class="content">{{item.content}}</text>
-          </view>
-          <view class="post-images" wx:if="{{item.images && item.images.length > 0}}">
-            <image wx:for="{{item.images}}" wx:key="*this" src="{{item}}" class="post-image" mode="aspectFill"></image>
-          </view>
-          <view class="post-actions">
-            <view class="action" bindtap="onLikePost" data-id="{{item._id}}">
-              <text class="icon">{{item.isLiked ? '♥' : '♡'}}</text>
-              <text class="count">{{item.likes}}</text>
+          <view class="show-details">
+            <view class="show-detail-item">
+              <image class="detail-icon" src="/images/calendar-icon.png"></image>
+              <text class="detail-text">{{item.showDateStr}}</text>
             </view>
-            <view class="action">
-              <text class="icon">💬</text>
-              <text class="count">{{item.comments}}</text>
+            <view class="show-detail-item">
+              <image class="detail-icon" src="/images/location-icon.png"></image>
+              <text class="detail-text">{{item.venue}} · {{item.city}}</text>
+            </view>
+          </view>
+          <view class="show-footer">
+            <text class="show-price">{{item.priceRange}}</text>
+            <view class="show-actions">
+              <view class="action-btn collect-btn" bindtap="onCollectTap" data-id="{{item.id}}" data-index="{{index}}">
+                <image class="collect-icon" src="{{item.isCollected ? '/images/heart-filled.png' : '/images/heart-outline.png'}}"></image>
+              </view>
             </view>
           </view>
         </view>
       </view>
-    </view>
 
-    <!-- 用户引导 -->
-    <view class="guide-section" wx:if="{{!hasUserInfo}}">
-      <view class="guide-content">
-        <text class="guide-title">开始你的摇滚之旅</text>
-        <text class="guide-desc">登录后可以发现更多精彩的摇滚演出</text>
-        <button class="guide-btn" bindtap="goToProfile">立即登录</button>
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMore && !isLoading}}">
+        <text class="load-more-text" bindtap="loadMoreShows">加载更多</text>
+      </view>
+
+      <!-- 加载中 -->
+      <view class="loading-more" wx:if="{{isLoading && shows.length > 0}}">
+        <view class="loading-spinner-small"></view>
+        <text class="loading-more-text">加载中...</text>
       </view>
     </view>
   </view>
-</scroll-view>
+</view>

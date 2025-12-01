@@ -1,21 +1,23 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/concerts/concerts",
-    "pages/concert-detail/concert-detail",
+    "pages/detail/detail",
     "pages/profile/profile",
-    "pages/profile-edit/profile-edit",
-    "pages/cases/cases",
-    "pages/logs/logs",
-    "pages/contact/contact"
+    "pages/search/search",
+    "pages/filter/filter",
+    "pages/collection/collection"
   ],
   "window": {
-    "navigationStyle": "custom"
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FF6B35",
+    "navigationBarTitleText": "演出活动",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F5F5"
   },
   "tabBar": {
-    "color": "#8a8a8a",
+    "color": "#666666",
     "selectedColor": "#FF6B35",
-    "backgroundColor": "#ffffff",
+    "backgroundColor": "#FFFFFF",
     "borderStyle": "black",
     "list": [
       {
@@ -25,8 +27,8 @@
         "selectedIconPath": "images/house1.png"
       },
       {
-        "pagePath": "pages/concerts/concerts",
-        "text": "演出",
+        "pagePath": "pages/search/search",
+        "text": "搜索",
         "iconPath": "images/Icon1.png",
         "selectedIconPath": "images/Icon2.png"
       },
@@ -44,5 +46,11 @@
   "lazyCodeLoading": "requiredComponents",
   "miniApp": {
     "useAuthorizePage": true
+  },
+  "cloud": true,
+  "permission": {
+    "scope.userLocation": {
+      "desc": "获取位置信息用于筛选附近演出"
+    }
   }
 }
